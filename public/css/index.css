@@ -1,0 +1,151 @@
+/* Smooth Scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Main page layout */
+.main {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    overflow-x: hidden;
+    text-align: center;
+}
+
+/* Opening image */
+.full-width-img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* About section */
+.about {
+    margin-bottom: 5px;
+    color: var(--logo);
+    font-size: 1.4rem;
+}
+
+#description {
+    margin: 0 auto;
+    max-width: 800px;
+    line-height: 1.7;
+}
+
+/* Classes section Container */
+.typeOfClasses {
+    display: flex;
+    margin-bottom: 0;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    align-content: center;
+    gap: 20px;
+    padding: 10px 0;
+    box-sizing: border-box;
+}
+
+/* Individual Class Card Wrapper */
+.typeOfClasses>div {
+    flex-basis: 20em;
+    flex-shrink: 1;
+    box-sizing: border-box;
+    background-color: var(--lightbeigh0) !important;
+    border-radius: 4px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin: 0;
+}
+
+/* Picture of the Class */
+.typeOfClasses .card-img-top {
+    width: 100%;
+    height: 230px;
+    display: block;
+    object-fit: cover;
+}
+
+/* The title of the Class */
+.typeOfClasses .card-text {
+    text-align: center;
+    color: var(--logo);
+    font-weight: 400;
+    font-size: 1.2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 36px;
+    padding: 0 8px;
+    margin: 0;
+    background-color: var(--lightbeigh0);
+}
+
+/* Makes the entire Class area clickable */
+.typeOfClasses a {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    cursor: pointer;
+}
+
+/* The open text details */
+.typeOfClasses .class-details {
+    border: none !important;
+    background-color: var(--lightbeigh0) !important;
+    margin: 0;
+    padding: 0 15px 12px;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    border-radius: 0 0 4px 4px;
+}
+
+/* Cancel default margins */
+.typeOfClasses .card {
+    margin: 0;
+}
+
+/* Contact section */
+.contact {
+    background-color: var(--darkgray);
+    color: var(--lightbeigh0);
+    padding: 20px 10px;
+}
+
+.contact h3 {
+    margin-bottom: 10px;
+    font-size: 28px;
+}
+
+.contact p {
+    margin: 0;
+    line-height: 1.7;
+    font-size: 1.2rem;
+}
+
+/* Email Link */
+.contact a {
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.contact a:hover {
+    text-decoration: underline;
+}
+
+/* Animation trigger */
+body {
+    animation: fadeInAnimation 0.8s ease-out;
+}
+
+@keyframes fadeInAnimation {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

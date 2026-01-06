@@ -1,0 +1,108 @@
+/* Main container layout */
+.main-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    padding: 40px 20px;
+    flex-wrap: nowrap;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.login-section {
+    flex: 1;
+    max-width: 400px;
+    text-align: center;
+}
+
+/* Image next to the Box */
+.image-wrapper {
+    display: flex;
+    justify-content: center;
+}
+
+.vertical-image {
+    max-height: 500px;
+    width: auto;
+    max-width: 100%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+}
+
+/* Login Box */
+.login-box {
+    border: 1px solid var(--lightbrown);
+    padding: 30px;
+    border-radius: 15px;
+    background-color: var(--lightbeigh0);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+/* Form Styles */
+.form-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.form-row label {
+    width: 80px;
+    margin-left: 10px;
+    text-align: right;
+    font-weight: 500;
+    font-size: 17px;
+    color: var(--lightblack);
+}
+
+.form-row input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fff;
+}
+
+/* Forgot password link */
+.forgot-pass {
+    display: block;
+    margin-bottom: 15px;
+    font-size: 14px;
+    color: var(--darkgray);
+    text-decoration: none;
+    text-align: left;
+    transition: color 0.3s;
+}
+
+.forgot-pass:hover {
+    color: var(--button);
+    text-decoration: underline;
+}
+
+/* Login and Register Buttons */
+/* Overwrite the 'global.css' to deal with bootstrap Settings 
+(בהגדרות של הכרטיסייה הייתה בעיה בלחיצה על הכפתור ולכן היינו צריכות לדרוס את העיצוב הכללי) */
+.login-page-btn {
+    width: 100% !important;
+    margin-top: 10px;
+    display: block;
+
+    background-color: var(--button);
+    border: 1.4px solid var(--button);
+    color: var(--lightbeigh0);
+}
+
+/* button hover, focus, active states */
+.login-page-btn:hover,
+.login-page-btn:focus,
+.login-page-btn:active,
+.login-page-btn:active:focus {
+    background-color: var(--lightbeigh0) !important;
+    color: var(--button) !important;
+    border: 1.4px solid var(--button) !important;
+
+    /* blue outline removal */
+    outline: none !important;
+    box-shadow: none !important;
+}

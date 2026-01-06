@@ -1,0 +1,94 @@
+body.page-loading {
+    opacity: 0;
+}
+
+body.page-loaded {
+    opacity: 1;
+    transition: opacity 0.2s ease;
+}
+
+/* Global Color Variables */
+:root {
+    --lightbeigh0: #F9F8F6;
+    --lightbeigh1: #EFE9E3;
+    --lightbrown: #D9CFC7;
+    --darkgray: #A3968D;
+    --lightgray: #edede9;
+    --lightgray1: #dcdcdd;
+    --lightblack: #403d39;
+    --lightblue0: #cce3de;
+    --lightblue1: #bbdefb;
+    --lightblue2: #90caf9;
+    --logo: #968069;
+    --button: #A69079;
+    --lightlogo: #F9F8F6;
+}
+
+/* Fonts Definitions (Oron) */
+@font-face {
+    font-family: 'Oron';
+    src: url('../Oron/Oron-Light.otf');
+    font-weight: 300;
+}
+
+@font-face {
+    font-family: 'Oron';
+    src: url('../Oron/Oron-Medium.otf');
+    font-weight: 400;
+}
+
+@font-face {
+    font-family: 'Oron';
+    src: url('../Oron/Oron-Bold.otf');
+    font-weight: 700;
+}
+
+@font-face {
+    font-family: 'Oron';
+    src: url('../Oron/Oron-Black.otf');
+    font-weight: 900;
+}
+
+/* Global Body Settings */
+body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--lightbeigh1);
+    font-family: 'Oron', sans-serif;
+    font-weight: 300;
+}
+
+/* Headers - Default Style */
+.headers {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    font-size: 55px;
+    font-weight: 400;
+    text-align: center;
+}
+
+/* Base Button Style (.btn) */
+.btn {
+    display: inline-block;
+    cursor: pointer;
+    border-radius: 4px;
+    border: 1.4px solid var(--button);
+    background-color: var(--button);
+    color: var(--lightbeigh0);
+    font-size: 16px;
+    padding: 5px 10px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.btn:hover,
+.btn:active {
+    background-color: var(--lightlogo);
+    color: var(--button);
+    border: 1.4px solid var(--button);
+}
+
+.btn:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}

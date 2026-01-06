@@ -1,0 +1,31 @@
+{
+  "name": "projectpartb-3-(1)",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "directories": {
+    "doc": "docs",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nitzanmy/CodeProject3.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/nitzanmy/CodeProject3/issues"
+  },
+  "homepage": "https://github.com/nitzanmy/CodeProject3#readme",
+  "dependencies": {
+    "body-parser": "^2.2.1",
+    "express": "^5.2.1",
+    "mysql2": "^3.16.0"
+  }
+}

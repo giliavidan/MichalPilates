@@ -1,0 +1,60 @@
+/* Navbar background color */
+.my-main-navbar {
+    background-color: var(--lightbeigh0) !important;
+
+}
+
+/* Register/Login button design */
+.btn-Login-Navbar {
+    background-color: var(--button);
+    border: 1.15px solid var(--button);
+    color: var(--lightbeigh0);
+}
+
+.btn-Login-Navbar:hover {
+    background-color: var(--lightbeigh0);
+    border: 1.3px solid var(--button);
+    color: var(--button);
+}
+
+/* Connected button design */
+#authBtn.btn-Logout-Navbar {
+    background-color: var(--lightbeigh0);
+    border: 1.25px solid var(--button);
+    color: var(--button);
+}
+
+#authBtn.btn-Logout-Navbar:hover {
+    background-color: var(--lightbeigh0);
+    border: 1.4px solid var(--button) !important;
+    color: var(--button);
+}
+
+/* General settings for the button*/
+#authBtn {
+    white-space: nowrap;
+    min-width: 120px;
+}
+
+/* The menu */
+.navbar-nav .nav-link {
+    white-space: nowrap;
+    color: var(--logo) !important;
+    font-size: 22px !important;
+    margin: 8px;
+}
+
+/* Small screen settings */
+@media (max-width: 991px) {
+
+    #authBtn {
+        width: fit-content;
+        margin-top: 20px;
+        margin-bottom: 15px;
+    }
+
+    .navbar-nav {
+        text-align: right;
+        padding-right: 0;
+    }
+}
