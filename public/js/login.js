@@ -27,19 +27,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 // 3. השרת החזיר תשובה. בואי נבדוק אם ההתחברות הצליחה
                 if (data.success) {
                     
-                    // שמירת פרטי המשתמש בדפדפן (כדי שנזכור מי מחובר)
-                    // --- התיקון כאן: הוספנו את שמירת ה-ID והמנוי ---
-                    sessionStorage.setItem('userId', data.user.id); // קריטי להרשמה!
+                    // שמירת פרטי המשתמש ב-SessionStorage (נשמר כל עוד הדפדפן פתוח)
+                    sessionStorage.setItem('userId', data.user.id); // זה המזהה שאיתו נרשמים לשיעורים (האימייל)
                     sessionStorage.setItem('userFirstName', data.user.firstName);
                     sessionStorage.setItem('userRole', data.user.role); 
                     sessionStorage.setItem('isLoggedIn', 'true');
                     
-                    // נשמור גם את סוג המנוי ל-LocalStorage כדי שהמגבלות יעבדו
+                    // שמירת סוג המנוי ב-LocalStorage (כדי שמגבלות הרישום יעבדו גם אם סוגרים את הדפדפן וחוזרים)
                     if (data.user.membershipType) {
                         localStorage.setItem('userMembershipType', data.user.membershipType);
                     }
-                    // ------------------------------------------------
-
+                    
                     alert('היי ' + data.user.firstName + ', התחברת בהצלחה!');
 
                     // הפניה לדף הבית

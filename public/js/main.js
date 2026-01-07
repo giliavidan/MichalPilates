@@ -30,8 +30,9 @@ document.addEventListener("DOMContentLoaded", function () {
     // --- 3. סיום הטעינה ---
     Promise.all(loadPromises).then(() => {
         
-        // כאן אנחנו מפעילים את השינוי של הכפתור
-        updateSingleAuthButton();
+        // --- השינוי הגדול: בדיקת חיבור לפני עדכון הכפתור ---
+        restoreSessionIfNeeded(); 
+        // ---------------------------------------------------
 
         // גלילה לאלמנט ספציפי אם יש בכתובת #
         if (window.location.hash) {
@@ -45,6 +46,36 @@ document.addEventListener("DOMContentLoaded", function () {
         document.body.classList.add("page-loaded");
     });
 });
+
+/**
+ * פונקציה חדשה: משחזרת את החיבור מהשרת אם צריך
+ */
+async function restoreSessionIfNeeded() {
+    // אם אין לנו מידע בזיכרון, ננסה לבקש מהשרת (אולי יש עוגייה)
+    if (!sessionStorage.getItem("isLoggedIn")) {
+        try {
+            const res = await fetch('/api/check-session');
+            const data = await res.json();
+            
+            if (data.isLoggedIn) {
+                // שחזור הנתונים לזיכרון הדפדפן
+                sessionStorage.setItem('userId', data.user.id);
+                sessionStorage.setItem('userFirstName', data.user.firstName);
+                sessionStorage.setItem('userRole', data.user.role);
+                sessionStorage.setItem('isLoggedIn', 'true');
+                
+                if (data.user.membershipType) {
+                    localStorage.setItem('userMembershipType', data.user.membershipType);
+                }
+            }
+        } catch (e) {
+            console.log("No session to restore");
+        }
+    }
+    
+    // אחרי שסיימנו לבדוק (הצלחנו או נכשלנו) - מעדכנים את הכפתור
+    updateSingleAuthButton();
+}
 
 /**
  * פונקציה שמטפלת בכפתור האחד והיחיד: authBtn
@@ -74,13 +105,16 @@ function updateSingleAuthButton() {
             // השאלה היחידה שמופיעה
             if (confirm('האם אתה רוצה להתנתק מהמשתמש ?')) {
                 
-                // מחיקת הזיכרון (session + local)
-                sessionStorage.clear();
-                localStorage.removeItem('userMembershipType'); 
-                localStorage.removeItem('myClassesGym'); // ניקוי שיעורים אם צריך
-
-                // מעבר מיידי לדף הבית או ההתחברות (בלי הודעת "הצלחה")
-                window.location.href = "index.html"; 
+                // שליחת בקשה לשרת למחיקת העוגייה
+                fetch('/logout')
+                    .then(() => {
+                        // מחיקת הזיכרון (session + local)
+                        sessionStorage.clear();
+                        localStorage.removeItem('userMembershipType'); 
+                        
+                        // מעבר מיידי לדף ההתחברות או הבית
+                        window.location.href = "index.html"; 
+                    });
             }
         };
 

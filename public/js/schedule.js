@@ -5,6 +5,39 @@ let currentManagingClassId = null;
 const role = sessionStorage.getItem('userRole');
 const isAdmin = (role === 'admin');
 
+// --- תיקון: חישוב מדויק לפי ימי ראשון ---
+function checkUrlForDate() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const dateParam = urlParams.get('date'); // מחפש ?date=2026-01-15
+
+    if (dateParam) {
+        const targetDate = new Date(dateParam);
+        const today = new Date();
+        
+        // איפוס שעות
+        targetDate.setHours(0,0,0,0);
+        today.setHours(0,0,0,0);
+
+        // מציאת יום ראשון של השבוע של השיעור
+        const targetSunday = new Date(targetDate);
+        targetSunday.setDate(targetDate.getDate() - targetDate.getDay());
+
+        // מציאת יום ראשון של השבוע הנוכחי (היום)
+        const currentSunday = new Date(today);
+        currentSunday.setDate(today.getDate() - today.getDay());
+
+        // חישוב ההפרש בשבועות בין שני ימי ראשון
+        const diffTime = targetSunday - currentSunday;
+        const diffWeeks = Math.round(diffTime / (1000 * 60 * 60 * 24 * 7));
+
+        currentWeekOffset = diffWeeks;
+    }
+}
+checkUrlForDate();
+
+// קוראים לפונקציה הזו מיד בהתחלה
+checkUrlForDate();
+
 document.addEventListener('DOMContentLoaded', function() {
     loadData();
 
