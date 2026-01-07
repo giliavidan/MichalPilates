@@ -64,18 +64,23 @@ function updateSingleAuthButton() {
         // 1. שינוי הטקסט
         authBtn.textContent = 'שלום, ' + firstName;
         
-        // 2. ביטול הקישור הרגיל (כדי שלא יעבור לדף התחברות)
+        // 2. ביטול הקישור הרגיל
         authBtn.href = "#";
 
-        // 3. הוספת אירוע לחיצה: שואל אם להתנתק
+        // 3. הוספת אירוע לחיצה: שואל ומתנתק מיד
         authBtn.onclick = function (event) {
-            event.preventDefault(); // עוצר את המעבר לדף אחר
+            event.preventDefault(); 
             
-            if (confirm('האם ברצונך להתנתק מהמערכת?')) {
-                // מחיקת הזיכרון
+            // השאלה היחידה שמופיעה
+            if (confirm('האם אתה רוצה להתנתק מהמשתמש ?')) {
+                
+                // מחיקת הזיכרון (session + local)
                 sessionStorage.clear();
-                alert('התנתקת בהצלחה');
-                window.location.href = "index.html"; // רענון הדף
+                localStorage.removeItem('userMembershipType'); 
+                localStorage.removeItem('myClassesGym'); // ניקוי שיעורים אם צריך
+
+                // מעבר מיידי לדף הבית או ההתחברות (בלי הודעת "הצלחה")
+                window.location.href = "index.html"; 
             }
         };
 
@@ -84,7 +89,7 @@ function updateSingleAuthButton() {
         // מחזירים את הכפתור למצב המקורי
         authBtn.textContent = 'הרשמה / התחברות';
         authBtn.href = "login.html";
-        authBtn.onclick = null; // מנקים את אירוע ההתנתקות
+        authBtn.onclick = null; 
     }
 
     // (אופציונלי) הסתרת הכפתור אם אנחנו כבר בתוך דף ההתחברות עצמו

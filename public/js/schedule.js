@@ -120,8 +120,21 @@ function renderSchedule(classes, notices) {
                 }
             }
 
+            // ============================================================
+            // השינוי כאן: יצירת כפתור זום לחיץ עם הקישור הקבוע
+            // ============================================================
             let zoomHtml = '';
-            if (isZoom) zoomHtml = `<span class="badge bg-primary">ZOOM</span>`;
+            if (isZoom) {
+                zoomHtml = `
+                    <a href="https://us02web.zoom.us/j/3430100607" 
+                       target="_blank" 
+                       class="badge bg-primary text-decoration-none" 
+                       style="cursor: pointer; position: relative; z-index: 10;"
+                       onclick="event.stopPropagation()">
+                       ZOOM
+                    </a>`;
+            }
+            // ============================================================
 
             const countDisplay = `
                 <span class="participants-tooltip-container" onmouseenter="showParticipants(this, ${cls.id})">
@@ -155,7 +168,6 @@ function renderSchedule(classes, notices) {
         });
     }
 }
-
 
 // =========================================================
 //         ניהול משתתפים למנהל (Admin Manager)
@@ -309,14 +321,22 @@ function registerForClass(classId, isWaitlist) {
     const membershipType = localStorage.getItem('userMembershipType') || 'guest';
     const isZoomClass = !!classItem.zoom;
 
+    // ==============================================================
+    // תרחיש 1: המשתמש הוא מנוי זום בלבד
+    // ==============================================================
     if (membershipType.includes('zoom')) {
         if (isZoomClass) {
-            alert('אין צורך להירשם לשיעורי זום.\nיש להיכנס לקישור בזמן השיעור.');
+            // שינוי 1: הודעה פשוטה בלי מעבר קישור ובלי שאלות
+            alert("מנוי זום לא צריך להירשם לשיעור.\nתיכנס לשיעור 5 דקות לפני שהשיעור מתחיל");
         } else {
             alert('המנוי שלך הוא לזום בלבד.');
         }
-        return; 
+        return; // עוצרים כאן, לא מבצעים רישום בשרת
     }
+
+    // ==============================================================
+    // תרחיש 2: המשתמש הוא מנוי סטודיו (רגיל/כרטיסייה)
+    // ==============================================================
 
     let weeklyLimit = Infinity;
     if (membershipType === 'gym_1perweek') weeklyLimit = 1;
@@ -346,8 +366,8 @@ function registerForClass(classId, isWaitlist) {
         }
     }
 
-    const msg = isWaitlist ? 'להירשם לרשימת המתנה?' : 'להירשם לשיעור?';
-    if(!confirm(msg)) return;
+    // שינוי 2: ביטלנו את ה-confirm ("האם להירשם?").
+    // הקוד עובר ישירות לשליחת הבקשה לשרת.
 
     fetch('/register-class', {
         method: 'POST',
@@ -357,7 +377,7 @@ function registerForClass(classId, isWaitlist) {
     .then(res => res.json())
     .then(data => {
         if (data.success) {
-            alert(data.message);
+            alert(data.message); // הודעת "נרשמת בהצלחה" שמגיעה מהשרת
             loadData();
         } else {
             alert(data.message);
@@ -367,7 +387,7 @@ function registerForClass(classId, isWaitlist) {
 
 function cancelRegistration(classId) {
     const uId = sessionStorage.getItem('userId');
-    if(!confirm('לבטל את הרישום/המתנה?')) return;
+    if(!confirm('לבטל את הרישום?')) return;
 
     fetch('/cancel-registration', {
         method: 'POST',
