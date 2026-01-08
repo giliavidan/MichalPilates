@@ -1,3 +1,6 @@
+('2026-01-11', '08:00', '09:00', 'פילאטיס מזרן קלאסי', 'Sunday', false),
+('2026-01-12', '18:00', '19:00', 'פילאטיס עם כדור קטן', 'Monday', true);
+
 -- יצירת הסכמה (בסיס הנתונים)
 CREATE SCHEMA IF NOT EXISTS michal_pilates;
 
@@ -35,7 +38,7 @@ CREATE TABLE classes (
   end_time TIME NOT NULL,
   instructor VARCHAR(45) DEFAULT 'מיכל',
   zoom BOOLEAN DEFAULT false,
-  max_participants INT DEFAULT 10,
+  max_participants INT DEFAULT 10,4
   current_participants INT DEFAULT 0,
   
   UNIQUE KEY unique_class_time (class_date, start_time) 
@@ -43,9 +46,6 @@ CREATE TABLE classes (
 
 -- הכנסת נתונים לבדיקה
 INSERT INTO classes (class_date, start_time, end_time, class_name, day_of_week, zoom) VALUES 
-('2026-01-11', '08:00', '09:00', 'פילאטיס מזרן קלאסי', 'Sunday', false),
-('2026-01-12', '18:00', '19:00', 'פילאטיס עם כדור קטן', 'Monday', true);
-
 
 
 -- יצירת טבלת הודעות

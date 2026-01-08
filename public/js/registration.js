@@ -1,4 +1,3 @@
-
 function containsNumbers(str) {
     return /\d/.test(str);
 }
@@ -76,21 +75,21 @@ if (registrationForm) {
             if (!element || !element.value) {
                 const label = document.querySelector(`label[for="${id}"]`);
                 const fieldName = label ? label.innerText.replace(':', '') : id;
-                alert('נא למלא את כל שדות החובה (' + fieldName + ')');
+                showMessage('נא למלא את כל שדות החובה (' + fieldName + ')');
                 return;
             }
         }
 
         // Validate training habits selection
         if (!document.querySelector('input[name="trainingHabits"]:checked')) {
-            alert('נא לבחור הרגלי אימון');
+            showMessage('נא לבחור הרגלי אימון');
             return;
         }
 
         // Validate membership type selection
         const membershipRadio = document.querySelector('input[name="membershipType"]:checked');
         if (!membershipRadio) {
-            alert('נא לבחור סוג כרטיסייה');
+            showMessage('נא לבחור סוג כרטיסייה');
             return;
         }
         const membershipType = membershipRadio.value;
@@ -102,21 +101,21 @@ if (registrationForm) {
         const currentYear = new Date().getFullYear();
 
         if (isNaN(selectedYear) || selectedYear < 1925 || selectedYear > currentYear) {
-            alert('שנת לידה לא תקינה!');
+            showMessage('שנת לידה לא תקינה!');
             return;
         }
 
         // Age validation 
         const age = calculateAge(birthdateValue);
         if (age < 16) {
-            alert('רישום לסטודיו מגיל 16 ומעלה');
+            showMessage('רישום לסטודיו מגיל 16 ומעלה');
             return;
         }
 
         // Email validation
         const email = document.getElementById('email').value;
         if (!isValidEmail(email)) {
-            alert('כתובת המייל שהוזנה אינה תקינה. נא לוודא שיש @ ונקודה.');
+            showMessage('כתובת המייל שהוזנה אינה תקינה. נא לוודא שיש @ ונקודה.');
             return;
         }
 
@@ -124,14 +123,14 @@ if (registrationForm) {
 
         // check for existing user with same email
         if (storedEmail && storedEmail === email) {
-            alert('משתמש עם כתובת המייל הזו כבר קיים במערכת! נא לעבור להתחברות או להשתמש במייל אחר.');
+            showMessage('משתמש עם כתובת המייל הזו כבר קיים במערכת! נא לעבור להתחברות או להשתמש במייל אחר.');
             return; // Stop registration    
         }
 
         // Phone number validation
         const phoneNumber = document.getElementById('phoneNumber').value;
         if (phoneNumber.length !== 7) {
-            alert('מספר הטלפון חייב להכיל בדיוק 7 ספרות (ללא הקידומת)');
+            showMessage('מספר הטלפון חייב להכיל בדיוק 7 ספרות (ללא הקידומת)');
             return;
         }
 
@@ -141,15 +140,15 @@ if (registrationForm) {
         const city = document.getElementById('city').value;
 
         if (containsNumbers(firstName)) {
-            alert('שם פרטי לא יכול להכיל מספרים');
+            showMessage('שם פרטי לא יכול להכיל מספרים');
             return;
         }
         if (containsNumbers(lastName)) {
-            alert('שם משפחה לא יכול להכיל מספרים');
+            showMessage('שם משפחה לא יכול להכיל מספרים');
             return;
         }
         if (city.length > 0 && containsNumbers(city)) {
-            alert('שם העיר לא יכול להכיל מספרים');
+            showMessage('שם העיר לא יכול להכיל מספרים');
             return;
         }
 
@@ -158,7 +157,7 @@ if (registrationForm) {
         const confirmPassword = document.getElementById('confirmPassword').value;
 
         if (password !== confirmPassword) {
-            alert('הסיסמאות אינן תואמות!');
+            showMessage('הסיסמאות אינן תואמות!');
             return;
         }
 
@@ -167,11 +166,10 @@ if (registrationForm) {
         const hasNumbers = /\d/.test(password);    // checks for numbers
 
         if (!hasLetters || !hasNumbers) {
-            alert('הסיסמא חייבת להכיל שילוב של אותיות ומספרים!');
+            showMessage('הסיסמא חייבת להכיל שילוב של אותיות ומספרים!');
             return;
         }
 
-      
         // 1. יצירת אובייקט עם כל הנתונים
         const userData = {
             email: email,
@@ -197,16 +195,26 @@ if (registrationForm) {
         .then(response => {
             if (response.ok) {
                 // ההרשמה הצליחה!
-                alert('ההרשמה בוצעה בהצלחה! מועבר להתחברות...');
-                window.location.href = 'login.html';
+                showMessage('ההרשמה בוצעה בהצלחה! מועבר להתחברות...');
+                // מעבר לדף התחברות אחרי סגירת ההודעה
+                const overlay = document.getElementById('global-message-overlay');
+                const okBtn   = document.getElementById('global-message-ok');
+                if (overlay && okBtn) {
+                    okBtn.onclick = function () {
+                        overlay.classList.add('msg-hidden');
+                        window.location.href = 'login.html';
+                    };
+                } else {
+                    window.location.href = 'login.html';
+                }
             } else {
                 // הייתה שגיאה בשרת (למשל אימייל כפול)
-                return response.text().then(text => { alert(text); });
+                return response.text().then(text => { showMessage(text); });
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('שגיאת תקשורת עם השרת');
+            showMessage('שגיאת תקשורת עם השרת');
         });
     });
 }

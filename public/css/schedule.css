@@ -92,13 +92,17 @@
     border-radius: 8px;
     padding: 15px;
     margin-bottom: 15px;
-    transition: transform 0.2s;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
-.class-card:hover {
+/* ברירת מחדל – ללא אפקט hover למשתמש רגיל */
+.class-card:hover {}
+
+/* אפקט hover רק לכרטיסים של אדמין (נקבע ב-JS עם admin-hover) */
+.class-card.admin-hover:hover {
     transform: translateY(-3px);
     border-color: var(--logo);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -130,8 +134,8 @@
 
 /* Zoom Link */
 .zoom-tag {
-    background-color: #e3f2fd;
-    color: #0d47a1;
+    background-color: #e3f2fd !important;
+    color: #0d47a1 !important;
     padding: 2px 6px;
     text-decoration: none;
     border-radius: 4px;
@@ -140,7 +144,8 @@
 }
 
 .zoom-tag:hover {
-    background-color: var(--lightblue1);
+    background-color: #0d47a1 !important;
+    color: #e3f2fd !important;
 }
 
 /* Registration Button (Green) */
@@ -203,12 +208,12 @@
 }
 
 /* ========================================= */
-/* תוספות לממשק ניהול (Admin)          */
+/* תוספות לממשק ניהול (Admin)              */
 /* ========================================= */
 
-/* כפתור הוספת שיעור (הירוק הגדול למעלה) */
+/*כפתור הוספת שיעור*/
 #btn-add-class-mode {
-    background-color: #2ecc71; /* ירוק חי */
+    background-color:var(--lightOliveGreen); 
     color: white;
     border: none;
     font-weight: bold;
@@ -222,38 +227,40 @@
 }
 
 #btn-add-class-mode:hover {
-    background-color: #27ae60;
+    background-color: var(--darkerOliveGreen);
 }
+
 
 /* מיכל כפתורי הניהול בתוך הכרטיסייה (עריכה ומחיקה) */
 .admin-actions {
     display: flex;
-    gap: 8px; /* רווח בין הכפתורים */
+    gap: 10px; /* רווח בין הכפתורים */
     justify-content: center;
     margin-top: 10px;
 }
 
-/* עיצוב בסיסי לכפתורי עריכה/מחיקה */
+/* עיצוב לכפתורי עריכה/מחיקה */
 .btn-admin-edit, .btn-admin-delete {
-    flex: 1; /* שהכפתורים יהיו באותו רוחב */
-    border: none;
-    padding: 6px 0;
-    border-radius: 4px;
+    flex: 1; 
+    border:solid transparent 2px;
+    padding: 3px 0;
+    border-radius: 3px;
     font-size: 0.9rem;
     cursor: pointer;
-    color: white;
+    border-color: var(--chocolate);
+   color: var(--lightbeigh0);
     font-weight: bold;
     transition: opacity 0.2s;
 }
 
-/* כפתור עריכה - צהוב/כתום */
+/*כפתור עריכה*/
 .btn-admin-edit {
-    background-color: #f39c12;
+ background-color:var(--darkerOliveGreen);
 }
 
-/* כפתור מחיקה - אדום (תואם לכפתור ביטול הרשמה) */
+/*כפתור מחיקה*/
 .btn-admin-delete {
-    background-color: #e74c3c;
+background-color:#ae2012;
 }
 
 .btn-admin-edit:hover, .btn-admin-delete:hover {
@@ -276,12 +283,12 @@
     border-radius: 4px;
 }
 
-/* טולטיפ - רשימת משתתפים */
+/*רשימת משתתפים*/
 .participants-tooltip-container {
     position: relative;
     cursor: pointer;
-    text-decoration: underline;
-    text-decoration-style: dotted;
+    text-decoration: none;       
+    border-bottom: none;         
 }
 
 .participants-tooltip {
@@ -305,6 +312,10 @@
     display: block;
 }
 
+.waitlist-title {
+    color:#76b1c9;
+}
+
 /* שורה קטנה מעל כפתור המתנה */
 .waitlist-info {
     font-size: 0.8rem;
@@ -314,11 +325,21 @@
     text-align: center;
 }
 
-/* --- עיצוב פאנל ניהול שיעור (חדש) --- */
+/* --- עיצוב פאנל ניהול שיעור) --- */
 
 /* פס עליון צבעוני לפאנל כדי שבלוט */
 #admin-class-manager {
-    border-top: 5px solid #c8a35f; /* צבע המותג (זהב/חום) */
+    border-top: 5px solid #c8a35f; 
+}
+
+#admin-class-manager .col-md-8 .form-select {
+    max-width: 400px;
+    justify-content: flex-end;
+}
+
+#admin-class-manager .col-md-4 .btn {
+    max-width: 150px;
+    justify-content: flex-start;
 }
 
 /* סידור השורות ברשימה (שם בצד ימין, כפתור מחיקה בצד שמאל) */
@@ -327,15 +348,16 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px;
+    padding: 8px 0 8px 10px;
+    border: none;
 }
 
-/* עיצוב כפתור המחיקה (X קטן ואדום) */
+/* עיצוב כפתור המחיקה (X) */
 .btn-remove-user {
-    background-color: #ffe6e6; /* רקע אדום בהיר */
-    color: #c0392b; /* טקסט אדום כהה */
+    background-color: #ffe6e6; 
+    color: #c0392b; 
     border: none;
-    border-radius: 50%; /* עיגול מושלם */
+    border-radius: 50%; 
     width: 30px;
     height: 30px;
     line-height: 30px;
@@ -344,10 +366,11 @@
     font-size: 14px;
     font-weight: bold;
     transition: all 0.2s;
+    right: 16px;
 }
 
 .btn-remove-user:hover {
-    background-color: #e74c3c; /* אדום חזק במעבר עכבר */
+    background-color: #e74c3c; 
     color: white;
-    transform: scale(1.1); /* הגדלה קטנה */
+    transform: scale(1.1); 
 }

@@ -51,14 +51,12 @@ document.addEventListener("DOMContentLoaded", function () {
  * פונקציה חדשה: משחזרת את החיבור מהשרת אם צריך
  */
 async function restoreSessionIfNeeded() {
-    // אם אין לנו מידע בזיכרון, ננסה לבקש מהשרת (אולי יש עוגייה)
     if (!sessionStorage.getItem("isLoggedIn")) {
         try {
             const res = await fetch('/api/check-session');
             const data = await res.json();
             
             if (data.isLoggedIn) {
-                // שחזור הנתונים לזיכרון הדפדפן
                 sessionStorage.setItem('userId', data.user.id);
                 sessionStorage.setItem('userFirstName', data.user.firstName);
                 sessionStorage.setItem('userRole', data.user.role);
@@ -73,7 +71,6 @@ async function restoreSessionIfNeeded() {
         }
     }
     
-    // אחרי שסיימנו לבדוק (הצלחנו או נכשלנו) - מעדכנים את הכפתור
     updateSingleAuthButton();
 }
 
@@ -82,52 +79,87 @@ async function restoreSessionIfNeeded() {
  */
 function updateSingleAuthButton() {
     const authBtn = document.getElementById('authBtn');
-    
-    // אם הכפתור לא קיים (אולי הייתה שגיאה בטעינה), נעצור
     if (!authBtn) return;
 
-    // בדיקת נתונים בזיכרון
     const isLoggedIn = sessionStorage.getItem('isLoggedIn');
     const firstName = sessionStorage.getItem('userFirstName');
 
     // === מצב מחובר ===
     if (isLoggedIn === 'true') {
-        // 1. שינוי הטקסט
         authBtn.textContent = 'שלום, ' + firstName;
-        
-        // 2. ביטול הקישור הרגיל
         authBtn.href = "#";
 
-        // 3. הוספת אירוע לחיצה: שואל ומתנתק מיד
         authBtn.onclick = function (event) {
             event.preventDefault(); 
             
-            // השאלה היחידה שמופיעה
-            if (confirm('האם אתה רוצה להתנתק מהמשתמש ?')) {
-                
-                // שליחת בקשה לשרת למחיקת העוגייה
+            // כאן במקום confirm משתמשים ב-popup הגלובלי
+            showConfirm('האם את/ה רוצה להתנתק ?', function () {
                 fetch('/logout')
                     .then(() => {
-                        // מחיקת הזיכרון (session + local)
                         sessionStorage.clear();
                         localStorage.removeItem('userMembershipType'); 
-                        
-                        // מעבר מיידי לדף ההתחברות או הבית
                         window.location.href = "index.html"; 
                     });
-            }
+            });
         };
 
     // === מצב אורח ===
     } else {
-        // מחזירים את הכפתור למצב המקורי
         authBtn.textContent = 'הרשמה / התחברות';
         authBtn.href = "login.html";
         authBtn.onclick = null; 
     }
 
-    // (אופציונלי) הסתרת הכפתור אם אנחנו כבר בתוך דף ההתחברות עצמו
     if (document.body.id === 'page_login') {
         authBtn.style.display = 'none';
     }
 }
+
+/* -------- Global popup message helper (used instead of alert) -------- */
+function showMessage(text) {
+    const overlay = document.getElementById('global-message-overlay');
+    const msgText = document.getElementById('global-message-text');
+    const okBtn   = document.getElementById('global-message-ok');
+
+    if (!overlay || !msgText || !okBtn) return;
+
+    msgText.textContent = text;
+    overlay.classList.remove('msg-hidden');
+
+    okBtn.onclick = function () {
+        overlay.classList.add('msg-hidden');
+    };
+}
+
+// פונקציית אישור/ביטול עם אותו popup גלובלי
+function showConfirm(text, onConfirm, onCancel) {
+    const overlay = document.getElementById('global-message-overlay');
+    const msgText = document.getElementById('global-message-text');
+    const okBtn   = document.getElementById('global-message-ok');
+
+    if (!overlay || !msgText || !okBtn) return;
+
+    msgText.textContent = text;
+    overlay.classList.remove('msg-hidden');
+
+    okBtn.onclick = function () {
+        overlay.classList.add('msg-hidden');
+        if (typeof onConfirm === 'function') {
+            onConfirm();
+        }
+    };
+
+    overlay.onclick = function (e) {
+        if (e.target === overlay) {
+            overlay.classList.add('msg-hidden');
+            overlay.onclick = null;
+            if (typeof onCancel === 'function') {
+                onCancel();
+            }
+        }
+    };
+}
+
+// לחשוף את הפונקציות כך שקבצים אחרים יוכלו להשתמש בהן
+window.showMessage = showMessage;
+window.showConfirm = showConfirm;

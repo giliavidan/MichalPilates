@@ -26,19 +26,12 @@
     </div>
 
     <div class="week-navigation">
-        <button class="nav-btn btn" onclick="changeWeek(-1)">
-            <i class="fas fa-chevron-right"></i> שבוע שעבר
-        </button>
-
-        <button class="nav-btn btn" onclick="changeWeek(1)">
-            שבוע הבא <i class="fas fa-chevron-left"></i>
-        </button>
+        <button class="nav-btn btn" onclick="changeWeek(-1)"><i class="fas fa-chevron-right"></i> שבוע שעבר</button>
+        <button class="nav-btn btn" onclick="changeWeek(1)"> שבוע הבא <i class="fas fa-chevron-left"></i> </button>
     </div>
     
     <div class="schedule-container text-start">
-        <button id="btn-add-class-mode" class="btn btn-success" style="display: none;">
-            ➕ הוספת שיעור חדש
-        </button>
+        <button id="btn-add-class-mode" class="btn btn-success" style="display: none;"> הוספת שיעור חדש </button>
     </div>
 
     <div class="schedule-container">
@@ -95,15 +88,16 @@
             <span id="manager-class-time" class="fs-5 text-muted ms-2"></span>
         </h3>
 
-        <div class="row mb-4 align-items-end bg-light p-3 rounded mx-0">
-            <div class="col-md-8">
-                <label class="form-label fw-bold">הוספת מתעמלת לשיעור:</label>
-                <select id="all-users-select" class="form-select">
-                    <option value="">-- טוען רשימת מתעמלות... --</option>
-                </select>
-            </div>
-            <div class="col-md-4 mt-2 mt-md-0">
-                <button class="btn btn-success w-100 fw-bold" onclick="adminAddUserToClass()">
+        <!-- בלוק הוספת מתעמלת לשיעור מעודכן -->
+        <div class="row mb-4 bg-light p-3 rounded mx-0">
+            <div class="col-md-12 d-flex align-items-end justify-content-start gap-3">
+                <div class="select-wrapper">
+                    <label class="form-label fw-bold d-block">הוספת מתעמלת לשיעור:</label>
+                    <select id="all-users-select" class="form-select">
+                        <option value="">-- טוען רשימת מתעמלות... --</option>
+                    </select>
+                </div>
+                <button class="btn btn-success fw-bold btn-add-user" onclick="adminAddUserToClass()">
                     <i class="fas fa-plus-circle"></i> הוסף לשיעור
                 </button>
             </div>
@@ -115,15 +109,15 @@
                     <i class="fas fa-check-circle"></i> רשומים לשיעור (<span id="count-registered">0</span>)
                 </h5>
                 <ul id="list-registered" class="list-group list-group-flush mt-2" style="max-height: 300px; overflow-y: auto;">
-                    </ul>
+                </ul>
             </div>
 
             <div class="col-md-6 mt-3 mt-md-0">
-                <h5 class="text-warning border-bottom pb-2">
-                    <i class="fas fa-clock"></i> רשימת המתנה (<span id="count-waitlist">0</span>)
-                </h5>
+               <h5 class="waitlist-title border-bottom pb-2">
+               <i class="fas fa-clock"></i> רשימת המתנה (<span id="count-waitlist">0</span>)
+               </h5>
                 <ul id="list-waitlist" class="list-group list-group-flush mt-2" style="max-height: 300px; overflow-y: auto;">
-                    </ul>
+                </ul>
             </div>
         </div>
         
@@ -131,6 +125,7 @@
             <button class="btn btn-secondary px-4" onclick="document.getElementById('admin-class-manager').style.display='none'">סגור ניהול</button>
         </div>
     </div>
+
     <div class="modal fade" id="classModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -170,7 +165,7 @@
                             </div>
                             <div class="col">
                                 <label>משתתפים מקס'</label>
-                                <input type="number" id="maxParticipants" class="form-control" value="10">
+                                <input type="number" id="maxParticipants" class="form-control" value="8">
                             </div>
                         </div>
                         
@@ -200,6 +195,14 @@
     </div>
 
     <div id="footer-placeholder"></div>
+
+    <!-- Popup גלובלי להודעות -->
+    <div class="global-message-overlay msg-hidden" id="global-message-overlay">
+        <div class="global-message-box" id="global-message-box">
+            <p class="popup-message" id="global-message-text"></p>
+            <button class="btn global-message-ok" id="global-message-ok">אישור</button>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/main.js"></script>

@@ -7,13 +7,11 @@ document.addEventListener("DOMContentLoaded", async function () {
     const classesSection = document.getElementById("profile-classes-section");
 
     // --- מנגנון שחזור חיבור (חדש!) ---
-    // אם הדפדפן "שכח" שאת מחוברת, נבדוק מול השרת אם יש עוגייה בתוקף
     if (!sessionStorage.getItem("isLoggedIn")) {
         try {
             const res = await fetch('/api/check-session');
             const data = await res.json();
             if (data.isLoggedIn) {
-                // השרת זיהה אותנו! משחזרים את המידע לזיכרון
                 sessionStorage.setItem('userId', data.user.id);
                 sessionStorage.setItem('userFirstName', data.user.firstName);
                 sessionStorage.setItem('userRole', data.user.role);
@@ -24,16 +22,14 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     }
 
-    // בדיקת התחברות (אחרי שניסינו לשחזר)
     const isLoggedIn = sessionStorage.getItem("isLoggedIn") === "true";
     const userId = sessionStorage.getItem("userId");
 
-    // משתנים גלובליים
     let currentUserData = {};
     let isEditMode = false;
 
     if (!isLoggedIn || !userId) {
-        if (loginMessage) loginMessage.textContent = "יש להתחבר לחשבון כדי לראות את פרטי הפרופיל והשיעורים.";
+        if (loginMessage) loginMessage.textContent = "יש להתחבר לחשבון כדי לראות את פרטי הפרופיל והשיעורים";
         if (detailsSection) detailsSection.style.display = "none";
         if (classesSection) classesSection.style.display = "none";
         return;
@@ -44,16 +40,16 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (loginMessage) loginMessage.textContent = "";
 
     // ==============================================
-    //        חלק א': טעינת פרטי משתמש
+    //       חלק א': טעינת פרטי משתמש
     // ==============================================
-    
+
     function fetchUserData() {
         fetch(`/api/user-info?userId=${userId}`)
             .then(res => res.json())
             .then(user => {
                 if (user.error) return;
-                currentUserData = user; 
-                renderUserDetails(false); 
+                currentUserData = user;
+                renderUserDetails(false);
             })
             .catch(err => console.error(err));
     }
@@ -61,31 +57,28 @@ document.addEventListener("DOMContentLoaded", async function () {
     fetchUserData();
 
     function renderUserDetails(editMode) {
-        profileDetailsInner.innerHTML = ''; 
+        profileDetailsInner.innerHTML = '';
 
         if (!editMode) {
-            // --- מצב צפייה ---
             editBtn.textContent = "עריכת פרטים";
-            editBtn.className = "btn btn-edit-details"; 
-            
+            editBtn.className = "btn btn-edit-details";
+
             addRow("שם מלא:", (currentUserData.first_name || "") + " " + (currentUserData.last_name || ""));
             addRow("תאריך לידה:", formatDateToIsraeli(currentUserData.birthdate) || "");
             addRow("מקום מגורים:", currentUserData.city || "");
             addRow("טלפון:", currentUserData.phone || "");
-            addRow("אימייל:", currentUserData.email || ""); 
+            addRow("אימייל:", currentUserData.email || "");
             addRow("סוג מנוי:", translateMembership(currentUserData.membership_type));
         } else {
-            // --- מצב עריכה ---
             editBtn.textContent = "שמירת שינויים";
-            editBtn.className = "btn btn-success"; 
+            editBtn.className = "btn btn-success";
 
             addInputRow("שם פרטי:", "firstName", currentUserData.first_name);
             addInputRow("שם משפחה:", "lastName", currentUserData.last_name);
             addInputRow("תאריך לידה:", "birthdate", currentUserData.birthdate, "date");
             addInputRow("מקום מגורים:", "city", currentUserData.city);
             addInputRow("טלפון:", "phone", currentUserData.phone);
-            
-            // שדות שלא ניתנים לעריכה
+
             addRow("אימייל (לא ניתן לשינוי):", currentUserData.email);
             addRow("סוג מנוי:", translateMembership(currentUserData.membership_type));
         }
@@ -102,7 +95,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     function saveUserData() {
         const updatedData = {
-            email: userId, 
+            email: userId,
             firstName: document.getElementById("input-firstName").value,
             lastName: document.getElementById("input-lastName").value,
             birthdate: document.getElementById("input-birthdate").value,
@@ -115,23 +108,25 @@ document.addEventListener("DOMContentLoaded", async function () {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(updatedData)
         })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                alert("הפרטים עודכנו בהצלחה!");
-                isEditMode = false;
-                fetchUserData(); 
-                
-                // עדכון השם גם בזיכרון הדפדפן
-                sessionStorage.setItem('userFirstName', updatedData.firstName);
-            } else {
-                alert("שגיאה: " + data.message);
-            }
-        });
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage("הפרטים עודכנו בהצלחה");
+                    isEditMode = false;
+                    fetchUserData();
+                    sessionStorage.setItem('userFirstName', updatedData.firstName);
+                } else {
+                    const msg = data.message ? "שגיאה: " + data.message : "אירעה שגיאה בעת עדכון הפרטים";
+                    showMessage(msg);
+                }
+            })
+            .catch(() => {
+                showMessage("אירעה שגיאה בעת שמירת הפרטים. נסי שוב מאוחר יותר.");
+            });
     }
 
     // ==============================================
-    //        חלק ב': שיעורים
+    //       חלק ב': שיעורים
     // ==============================================
 
     loadMyClasses(userId);
@@ -141,33 +136,34 @@ document.addEventListener("DOMContentLoaded", async function () {
             .then(res => res.json())
             .then(classes => {
                 profileClassesContainer.innerHTML = '';
-                
-                // עדכון הכותרת ל"שיעורים הקרובים"
-                const titleEl = document.querySelector('#profile-classes-section .section-title');
-                if(titleEl) titleEl.textContent = "השיעורים הקרובים שלי";
 
-                if (classes.length === 0) {
+                const titleEl = document.querySelector('#profile-classes-section .section-title');
+                if (titleEl) titleEl.textContent = "השיעורים הקרובים שלי";
+
+                if (!classes || classes.length === 0) {
                     profileClassesContainer.innerHTML = '<p class="text-center text-muted">אין שיעורים קרובים כרגע.</p>';
                     return;
                 }
                 classes.forEach(cls => createClassCard(cls));
             })
-            .catch(err => console.error(err));
+            .catch(err => {
+                console.error(err);
+                showMessage("לא ניתן לטעון את רשימת השיעורים כרגע.");
+            });
     }
 
     function createClassCard(cls) {
         const card = document.createElement("div");
-        card.className = "profile-class-card"; 
+        card.className = "profile-class-card";
 
-        // לחיצה מעבירה לתאריך בלוח השעות
-        card.onclick = function() {
+        card.onclick = function () {
             window.location.href = `schedule.html?date=${cls.class_date}`;
         };
 
-        const israeliDate = formatDateToIsraeli(cls.class_date); 
+        const israeliDate = formatDateToIsraeli(cls.class_date);
         const startTime = cls.start_time.substring(0, 5);
         const endTime = cls.end_time.substring(0, 5);
-        
+
         const titleDiv = document.createElement("div");
         titleDiv.className = "profile-class-title";
         titleDiv.textContent = cls.class_name;
@@ -175,53 +171,62 @@ document.addEventListener("DOMContentLoaded", async function () {
 
         const metaDiv = document.createElement("div");
         metaDiv.className = "profile-class-meta";
-        // עיצוב שעות משמאל לימין ותאריך ישראלי
         metaDiv.innerHTML = `
             ${israeliDate} • 
             <span style="direction: ltr; display: inline-block;">${startTime} - ${endTime}</span>
         `;
 
         const cancelBtn = document.createElement("button");
-        cancelBtn.className = "btn-cancel-class"; 
+        cancelBtn.className = "btn-cancel-class";
         cancelBtn.textContent = "ביטול רישום";
-        
-        cancelBtn.onclick = function(e) {
-            e.stopPropagation(); 
+
+        cancelBtn.onclick = function (e) {
+            e.stopPropagation();
             cancelMyClass(cls.id);
         };
 
         card.appendChild(titleDiv);
         card.appendChild(metaDiv);
         card.appendChild(cancelBtn);
-        
+
         profileClassesContainer.appendChild(card);
     }
 
     function cancelMyClass(classId) {
-        if(!confirm("האם לבטל את הרישום לשיעור זה?")) return;
-        fetch('/cancel-registration', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId: userId, classId: classId })
-        }).then(res => res.json()).then(data => {
-            if (data.success) {
-                alert("הרישום בוטל");
-                loadMyClasses(userId);
-            } else {
-                alert("שגיאה בביטול");
-            }
+        // שאלה מעוצבת עם popup גלובלי
+        showConfirm("האם לבטל את הרישום לשיעור זה?", function () {
+            fetch('/cancel-registration', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: userId, classId: classId })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        // לא מציגים הודעה נוספת, רק מרעננים את רשימת השיעורים
+                        loadMyClasses(userId);
+                    } else {
+                        const msg = data.message ? "שגיאה בביטול: " + data.message : "אירעה שגיאה בביטול השיעור";
+                        showMessage(msg);
+                    }
+                })
+                .catch(() => {
+                    showMessage("לא ניתן לבטל את השיעור כרגע. נסי/ה שוב מאוחר יותר.");
+                });
+        }, function () {
+            // בחרו ביטול – לא עושים כלום
         });
     }
 
     // ==============================================
-    //        פונקציות עזר
+    //       פונקציות עזר
     // ==============================================
 
     function formatDateToIsraeli(dateStr) {
         if (!dateStr) return "";
-        const parts = dateStr.split('-'); 
-        if (parts.length < 3) return dateStr; 
-        return `${parts[2]}/${parts[1]}/${parts[0]}`; 
+        const parts = dateStr.split('-');
+        if (parts.length < 3) return dateStr;
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
     }
 
     function addRow(label, value) {
@@ -234,16 +239,16 @@ document.addEventListener("DOMContentLoaded", async function () {
     function addInputRow(label, fieldName, value, type = "text") {
         const row = document.createElement("div");
         row.className = "profile-row";
-        
+
         const labelSpan = document.createElement("span");
         labelSpan.className = "profile-row-label";
         labelSpan.textContent = label;
 
         const input = document.createElement("input");
         input.type = type;
-        input.className = "profile-edit-input"; 
+        input.className = "profile-edit-input";
         input.value = value || "";
-        input.id = "input-" + fieldName; 
+        input.id = "input-" + fieldName;
 
         const wrapper = document.createElement("div");
         wrapper.style.flex = "1";
@@ -255,8 +260,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
 
     function translateMembership(type) {
-        if (type === "gym_1perweek") return "מנוי סטודיו (1 בשבוע)";
-        if (type === "gym_2perweek") return "מנוי סטודיו (2 בשבוע)";
+        if (type === "gym_1perweek") return "מנוי סטודיו (שיעור 1 בשבוע)";
+        if (type === "gym_2perweek") return "מנוי סטודיו (2 שיעורים בשבוע)";
         if (type && type.includes("zoom")) return "כרטיסיית זום";
         if (type === "guest") return "אורח";
         return type || "לא הוגדר מנוי";

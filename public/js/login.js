@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(response => response.json())
             .then(data => {
-                // 3. השרת החזיר תשובה. בואי נבדוק אם ההתחברות הצליחה
+                // 3. השרת החזיר תשובה. נבדוק אם ההתחברות הצליחה
                 if (data.success) {
                     
                     // שמירת פרטי המשתמש ב-SessionStorage (נשמר כל עוד הדפדפן פתוח)
@@ -38,18 +38,21 @@ document.addEventListener('DOMContentLoaded', function() {
                         localStorage.setItem('userMembershipType', data.user.membershipType);
                     }
                     
-                    alert('היי ' + data.user.firstName + ', התחברת בהצלחה!');
+                    // הודעת הצלחה דרך ה‑popup המעוצב
+                    showMessage('היי ' + data.user.firstName + ', התחברת בהצלחה!');
 
-                    // הפניה לדף הבית
-                    window.location.href = "index.html"; 
+                    // הפניה לדף הבית אחרי זמן קצר (כדי שיספיקו לראות את ההודעה)
+                    setTimeout(() => {
+                        window.location.href = "index.html";
+                    }, 1200);
                 } else {
-                    // השרת אמר שהסיסמה או האימייל לא נכונים
-                    alert(data.message); 
+                    // סיסמה / אימייל לא נכונים – הודעה גלובלית
+                    showMessage(data.message || 'שם משתמש או סיסמה שגויים.');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('שגיאת תקשורת עם השרת');
+                showMessage('שגיאת תקשורת עם השרת');
             });
         });
     }

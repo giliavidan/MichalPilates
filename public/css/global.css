@@ -22,6 +22,9 @@ body.page-loaded {
     --logo: #968069;
     --button: #A69079;
     --lightlogo: #F9F8F6;
+    --lightOliveGreen:#b5c99a;
+    --darkerOliveGreen:#97a97c;
+    --chocolate: #583101;
 }
 
 /* Fonts Definitions (Oron) */
@@ -91,4 +94,46 @@ body {
 .btn:focus {
     outline: none !important;
     box-shadow: none !important;
+}
+
+/* ========================================================= */
+/* Global popup messages (modal) - לכל ההודעות הקופצות      */
+/* ========================================================= */
+
+.global-message-overlay { /*השכבה שמכסה את המסך*/
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.25); /*נותן רקע שחור שקוף מעל כל המסך שעושה אפקט “כיבוי” לרקע*/
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999; /*מבטיח שההודעה תהיה מעל כל שאר האלמנטים והנבבר*/
+}
+
+/*איך מסתירים את ההודעה+הרקע*/
+.global-message-overlay.msg-hidden { /* Selector targets the same element when it has both class "global-message-overlay" and class "msg-hidden"*/
+    display: none;
+}
+
+/*מגדיר את “הקופסה” שבמרכז- של ההודעה עצמה*/
+.global-message-box {
+    background-color: var(--lightbeigh0);
+    border-radius: 8px;
+    padding: 24px 28px;
+    max-width: 420px;
+    width: 90%;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+    text-align: center;
+}
+/*הטקסט של ההודעה הקופצת*/
+.global-message-box p {
+    margin: 0 0 18px;
+    color: var(--lightblack);        
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+/*כפתור האישור בחלון ההודעה */
+.global-message-box .global-message-ok {
+    min-width: 120px; /*כאן רק מגדירים לו רוחב מינימלי את הצבעים לוקח מהלחצן הגלובלי*/
 }

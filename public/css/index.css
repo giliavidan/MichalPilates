@@ -19,17 +19,16 @@ html {
     display: block;
 }
 
-/* About section */
-.about {
-    margin-bottom: 5px;
-    color: var(--logo);
-    font-size: 1.4rem;
+.about .headers {
+    margin-bottom: 0;   /* במקום מרווח ברירת מחדל גדול יותר */
 }
 
 #description {
-    margin: 0 auto;
+    margin:0 auto;
     max-width: 800px;
     line-height: 1.7;
+    font-size: 1.4rem;
+    margin-bottom: 17px;  
 }
 
 /* Classes section Container */

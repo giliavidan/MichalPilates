@@ -5,37 +5,29 @@ let currentManagingClassId = null;
 const role = sessionStorage.getItem('userRole');
 const isAdmin = (role === 'admin');
 
-// --- תיקון: חישוב מדויק לפי ימי ראשון ---
 function checkUrlForDate() {
     const urlParams = new URLSearchParams(window.location.search);
-    const dateParam = urlParams.get('date'); // מחפש ?date=2026-01-15
+    const dateParam = urlParams.get('date');
 
     if (dateParam) {
         const targetDate = new Date(dateParam);
         const today = new Date();
         
-        // איפוס שעות
         targetDate.setHours(0,0,0,0);
         today.setHours(0,0,0,0);
 
-        // מציאת יום ראשון של השבוע של השיעור
         const targetSunday = new Date(targetDate);
         targetSunday.setDate(targetDate.getDate() - targetDate.getDay());
 
-        // מציאת יום ראשון של השבוע הנוכחי (היום)
         const currentSunday = new Date(today);
         currentSunday.setDate(today.getDate() - today.getDay());
 
-        // חישוב ההפרש בשבועות בין שני ימי ראשון
         const diffTime = targetSunday - currentSunday;
         const diffWeeks = Math.round(diffTime / (1000 * 60 * 60 * 24 * 7));
 
         currentWeekOffset = diffWeeks;
     }
 }
-checkUrlForDate();
-
-// קוראים לפונקציה הזו מיד בהתחלה
 checkUrlForDate();
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -113,6 +105,13 @@ function renderSchedule(classes, notices) {
         if (el) { el.innerHTML = ''; if (i === 6) el.innerHTML = '<p class="text-center mt-3 text-muted">מנוחה</p>'; }
     }
 
+    const loggedUserId = sessionStorage.getItem('userId');
+    const membershipType = localStorage.getItem('userMembershipType') || 'guest';
+    const canSeeZoomLink =
+        membershipType === 'gym_1perweek' ||
+        membershipType === 'gym_2perweek' ||
+        membershipType === 'zoom';
+
     for (let i = 0; i <= 6; i++) {
         const dayContainer = document.getElementById(`day-content-${i}`);
         if (!dayContainer) continue;
@@ -133,41 +132,41 @@ function renderSchedule(classes, notices) {
             if (isAdmin) {
                 actionHtml = `
                     <div class="admin-actions">
-                        <button class="btn-admin-edit" onclick="event.stopPropagation(); openModal(${cls.id})">✏️</button>
-                        <button class="btn-admin-delete" onclick="event.stopPropagation(); deleteClass(${cls.id})">🗑️</button>
+                        <button class="btn-admin-edit" onclick="event.stopPropagation(); openModal(${cls.id})">עריכה</button>
+                        <button class="btn-admin-delete" onclick="event.stopPropagation(); deleteClass(${cls.id})">מחיקה</button>
                     </div>`;
             } else {
-                if (userStatus === 'registered') {
-                    actionHtml = `<button class="register-btn registered" onclick="cancelRegistration(${cls.id})">רשום ✓ (ביטול)</button>`;
-                } else if (userStatus === 'waitlist') {
-                    actionHtml = `
-                        <div class="waitlist-info">את/ה מספר ${cls.waitlist_position} מתוך ${cls.total_waitlist} ממתינים</div>
-                        <button class="register-btn-waitlist" onclick="cancelRegistration(${cls.id})">ביטול המתנה</button>
-                    `;
+                if (!loggedUserId) {
+                    actionHtml = '';
                 } else {
-                    if (!isZoom && isFull) {
-                         actionHtml = `<button class="register-btn-waitlist" onclick="registerForClass(${cls.id}, true)">הרשמה להמתנה</button>`;
+                    if (userStatus === 'registered') {
+                        actionHtml = `<button class="register-btn registered" onclick="cancelRegistration(${cls.id})">רשום ✓ (ביטול)</button>`;
+                    } else if (userStatus === 'waitlist') {
+                        actionHtml = `
+                            <div class="waitlist-info">את/ה מספר ${cls.waitlist_position} מתוך ${cls.total_waitlist} ממתינים</div>
+                            <button class="register-btn-waitlist" onclick="cancelRegistration(${cls.id})">ביטול המתנה</button>
+                        `;
                     } else {
-                         actionHtml = `<button class="register-btn" onclick="registerForClass(${cls.id}, false)">הרשמה לשיעור</button>`;
+                        if (!isZoom && isFull) {
+                             actionHtml = `<button class="register-btn-waitlist" onclick="registerForClass(${cls.id}, true)">הרשמה להמתנה</button>`;
+                        } else {
+                             actionHtml = `<button class="register-btn" onclick="registerForClass(${cls.id}, false)">הרשמה לשיעור</button>`;
+                        }
                     }
                 }
             }
 
-            // ============================================================
-            // השינוי כאן: יצירת כפתור זום לחיץ עם הקישור הקבוע
-            // ============================================================
+            // ZOOM – רק לשיעור זום, רק למשתמש מחובר, ורק עם מנוי מתאים
             let zoomHtml = '';
-            if (isZoom) {
+            if (isZoom && loggedUserId && canSeeZoomLink) {
                 zoomHtml = `
                     <a href="https://us02web.zoom.us/j/3430100607" 
                        target="_blank" 
-                       class="badge bg-primary text-decoration-none" 
-                       style="cursor: pointer; position: relative; z-index: 10;"
+                       class="zoom-tag"
                        onclick="event.stopPropagation()">
                        ZOOM
                     </a>`;
             }
-            // ============================================================
 
             const countDisplay = `
                 <span class="participants-tooltip-container" onmouseenter="showParticipants(this, ${cls.id})">
@@ -178,8 +177,9 @@ function renderSchedule(classes, notices) {
 
             const card = document.createElement('div');
             card.className = 'class-card';
-            
+
             if (isAdmin) {
+                card.classList.add('admin-hover');   // אפקט hover רק לאדמין
                 card.style.cursor = 'pointer';
                 card.onclick = () => openClassManager(cls.id); 
                 card.setAttribute('title', 'לחצי לפתיחת ניהול משתתפים');
@@ -195,16 +195,16 @@ function renderSchedule(classes, notices) {
                     ${countDisplay}
                     ${zoomHtml}
                 </div>
-                ${actionHtml}
+                <div class="class-admin-actions-row">
+                    ${actionHtml}
+                </div>
             `;
             dayContainer.appendChild(card);
         });
     }
 }
 
-// =========================================================
-//         ניהול משתתפים למנהל (Admin Manager)
-// =========================================================
+// ===================== Admin manager =====================
 
 function openClassManager(classId) {
     if (!isAdmin) return;
@@ -212,28 +212,24 @@ function openClassManager(classId) {
     currentManagingClassId = classId;
     const cls = fetchedClasses.find(c => c.id === classId);
     
-    // 1. חישוב תאריך ישראלי (DD-MM-YYYY)
     let israeliDate = cls.class_date; 
-    let realDayName = ""; // משתנה ליום בשבוע
+    let realDayName = "";
 
     if (cls.class_date && cls.class_date.includes('-')) {
-        const parts = cls.class_date.split('-'); // 2026, 01, 06
+        const parts = cls.class_date.split('-');
         const year = parseInt(parts[0]);
-        const month = parseInt(parts[1]) - 1; // חודשים ב-JS מתחילים מ-0
+        const month = parseInt(parts[1]) - 1;
         const day = parseInt(parts[2]);
 
-        israeliDate = `${parts[2]}-${parts[1]}-${parts[0]}`; // הופך ל: 06-01-2026
+        israeliDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
         
-        // 2. חישוב אוטומטי של היום בשבוע לפי התאריך
         const dateObj = new Date(year, month, day); 
         const days = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
         realDayName = days[dateObj.getDay()];
     } else {
-        // גיבוי למקרה חירום
         realDayName = cls.day_of_week;
     }
 
-    // הצגה בכותרת: שם השיעור | יום מחושב | תאריך ישראלי | שעה
     document.getElementById('manager-class-name').innerText = cls.class_name;
     document.getElementById('manager-class-time').innerText = `יום ${realDayName} | ${israeliDate} | ${cls.start_time.substring(0,5)}`;
     
@@ -295,20 +291,20 @@ function loadManagerData(classId) {
 }
 
 function adminRemoveUser(userEmail, classId) {
-    if(!confirm('האם להסיר את המתעמלת מהשיעור?')) return;
-
-    fetch('/cancel-registration', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: userEmail, classId: classId })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if(data.success) {
-            loadData(); 
-        } else {
-            alert('שגיאה במחיקה');
-        }
+    showConfirm('האם להסיר את המתעמלת מהשיעור?', function () {
+        fetch('/cancel-registration', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: userEmail, classId: classId })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.success) {
+                loadData(); 
+            } else {
+                showMessage('שגיאה במחיקה');
+            }
+        });
     });
 }
 
@@ -316,7 +312,10 @@ function adminAddUserToClass() {
     const select = document.getElementById('all-users-select');
     const userEmail = select.value;
     
-    if (!userEmail) return alert('יש לבחור מתעמלת מהרשימה');
+    if (!userEmail) {
+        showMessage('יש לבחור מתעמלת מהרשימה');
+        return;
+    }
     if (!currentManagingClassId) return;
 
     fetch('/admin-add-user', {
@@ -327,24 +326,23 @@ function adminAddUserToClass() {
     .then(res => res.json())
     .then(data => {
         if(data.success) {
-            alert('הוספה בוצעה בהצלחה');
+            showMessage('הוספה בוצעה בהצלחה');
             loadData(); 
             select.value = ""; 
         } else {
-            alert(data.message);
+            showMessage(data.message);
         }
     });
 }
 
-
-// =========================================================
-//         לוגיקת משתמש רגיל
-// =========================================================
+// ===================== לוגיקת משתמש רגיל =====================
 
 function registerForClass(classId, isWaitlist) {
     const uId = sessionStorage.getItem('userId');
     if (!uId) {
-        if(confirm('יש להתחבר כדי להירשם. לעבור להתחברות?')) window.location.href='login.html';
+        showConfirm('יש להתחבר כדי להירשם. לעבור להתחברות?', function () {
+            window.location.href = 'login.html';
+        });
         return;
     }
 
@@ -354,22 +352,15 @@ function registerForClass(classId, isWaitlist) {
     const membershipType = localStorage.getItem('userMembershipType') || 'guest';
     const isZoomClass = !!classItem.zoom;
 
-    // ==============================================================
-    // תרחיש 1: המשתמש הוא מנוי זום בלבד
-    // ==============================================================
-    if (membershipType.includes('zoom')) {
+    // מנוי זום בלבד – לא נרשם לשום שיעור, רק הודעות מתאימות
+    if (membershipType === 'zoom') {
         if (isZoomClass) {
-            // שינוי 1: הודעה פשוטה בלי מעבר קישור ובלי שאלות
-            alert("מנוי זום לא צריך להירשם לשיעור.\nתיכנס לשיעור 5 דקות לפני שהשיעור מתחיל");
+            showMessage("מנוי זום לא צריך להירשם לשיעור.\nתיכנס לשיעור 5 דקות לפני שהשיעור מתחיל");
         } else {
-            alert('המנוי שלך הוא לזום בלבד.');
+            showMessage('המנוי שלך הוא לזום בלבד.');
         }
-        return; // עוצרים כאן, לא מבצעים רישום בשרת
+        return;
     }
-
-    // ==============================================================
-    // תרחיש 2: המשתמש הוא מנוי סטודיו (רגיל/כרטיסייה)
-    // ==============================================================
 
     let weeklyLimit = Infinity;
     if (membershipType === 'gym_1perweek') weeklyLimit = 1;
@@ -394,13 +385,10 @@ function registerForClass(classId, isWaitlist) {
         });
 
         if (registeredCount >= weeklyLimit) {
-            alert(`הגעת למכסת השיעורים השבועית שלך (${weeklyLimit} בשבוע).\nלא ניתן להירשם לשיעור נוסף השבוע.`);
+            showMessage(`הגעת למכסת השיעורים השבועית שלך (${weeklyLimit} בשבוע).\nלא ניתן להירשם לשיעור נוסף השבוע.`);
             return; 
         }
     }
-
-    // שינוי 2: ביטלנו את ה-confirm ("האם להירשם?").
-    // הקוד עובר ישירות לשליחת הבקשה לשרת.
 
     fetch('/register-class', {
         method: 'POST',
@@ -409,28 +397,29 @@ function registerForClass(classId, isWaitlist) {
     })
     .then(res => res.json())
     .then(data => {
+        showMessage(data.message);
         if (data.success) {
-            alert(data.message); // הודעת "נרשמת בהצלחה" שמגיעה מהשרת
             loadData();
-        } else {
-            alert(data.message);
         }
     });
 }
 
 function cancelRegistration(classId) {
     const uId = sessionStorage.getItem('userId');
-    if(!confirm('לבטל את הרישום?')) return;
-
-    fetch('/cancel-registration', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: uId, classId: classId })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) loadData();
-        else alert('שגיאה בביטול');
+    showConfirm('לבטל את הרישום?', function () {
+        fetch('/cancel-registration', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: uId, classId: classId })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                loadData();
+            } else {
+                showMessage('שגיאה בביטול');
+            }
+        });
     });
 }
 
@@ -500,6 +489,7 @@ function openModal(classId = null) {
         modalTitle.innerText = "הוספת שיעור חדש";
         document.getElementById('classId').value = ""; 
         document.getElementById('classDate').value = formatDateForInput(new Date());
+        document.getElementById('maxParticipants').value = 8;
     }
     const modal = new bootstrap.Modal(modalElement);
     modal.show();
@@ -523,21 +513,23 @@ function submitClassForm() {
     fetch(url, { method: method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(classData) })
     .then(res => res.json()).then(data => {
         if (data.success) {
-            alert(data.message || 'נשמר בהצלחה');
+            showMessage(data.message || 'נשמר בהצלחה');
             const modalEl = document.getElementById('classModal');
             const modalInstance = bootstrap.Modal.getInstance(modalEl);
             if (modalInstance) modalInstance.hide();
             loadData(); 
-        } else alert('שגיאה');
+        } else {
+            showMessage('שגיאה');
+        }
     });
 }
 
 function deleteClass(id) {
-    if (confirm('למחוק?')) {
+    showConfirm('למחוק?', function () {
         fetch(`/delete-class/${id}`, { method: 'DELETE' }).then(res => res.json()).then(data => {
-            if (data.success) loadData(); else alert('שגיאה');
+            if (data.success) loadData(); else showMessage('שגיאה');
         });
-    }
+    });
 }
 
 function addNewNotice() {
@@ -547,6 +539,9 @@ function addNewNotice() {
         document.getElementById('newNoticeInput').value = ''; loadData();
     });
 }
+
 function deleteMessage(id) {
-    if(confirm('למחוק?')) fetch(`/delete-message/${id}`, { method: 'DELETE' }).then(() => loadData());
+    showConfirm('למחוק?', function () {
+        fetch(`/delete-message/${id}`, { method: 'DELETE' }).then(() => loadData());
+    });
 }

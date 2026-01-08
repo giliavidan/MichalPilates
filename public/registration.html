@@ -17,7 +17,7 @@
 
     <!-- login form -->
     <div class="registirationForm">
-        <h1 class="headers">ברוך הבא לסטודיו של מיכל</h1>
+        <h1 class="headers">ברוכים הבאים<br>לסטודיו של מיכל</h1>
         <h4>אנא מלא את הפרטים הבאים:</h4>
 
         <form id="registration-Form" novalidate>
@@ -132,8 +132,7 @@
             <!-- Comments -->
             <div class="comments">
                 <label for="comments">הערות נוספות:</label><br>
-                <textarea id="comments" name="comments" rows="4" cols="50" placeholder="הערות מיוחדות, פציעות עבר וכו'">
-                    </textarea>
+                <textarea id="comments" name="comments" rows="4" cols="50" placeholder="הערות מיוחדות, פציעות עבר וכו'"></textarea>
             </div>
             <br>
 
@@ -144,6 +143,14 @@
     <hr>
 
     <div id="footer-placeholder"></div>
+
+    <!-- כאן התוספת: popup גלובלי להודעות -->
+    <div class="global-message-overlay msg-hidden" id="global-message-overlay">
+        <div class="global-message-box" id="global-message-box">
+            <p class="popup-message" id="global-message-text"></p>
+            <button class="btn global-message-ok" id="global-message-ok">אישור</button>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/main.js"></script>
