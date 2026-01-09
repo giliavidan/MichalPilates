@@ -143,7 +143,7 @@ function renderSchedule(classes, notices) {
                         actionHtml = `<button class="register-btn registered" onclick="cancelRegistration(${cls.id})">רשום ✓ (ביטול)</button>`;
                     } else if (userStatus === 'waitlist') {
                         actionHtml = `
-                            <div class="waitlist-info">את/ה מספר ${cls.waitlist_position} מתוך ${cls.total_waitlist} ממתינים</div>
+                            <div class="waitlist-info">את/ה במקום ה ${cls.waitlist_position} ברשימת המתנה</div>
                             <button class="register-btn-waitlist" onclick="cancelRegistration(${cls.id})">ביטול המתנה</button>
                         `;
                     } else {
@@ -156,7 +156,7 @@ function renderSchedule(classes, notices) {
                 }
             }
 
-            // ZOOM – רק לשיעור זום, רק למשתמש מחובר, ורק עם מנוי מתאים
+            // ZOOM –רק לשיעור זום, רק למשתמש מחובר, ורק עם מנוי מתאים יראה
             let zoomHtml = '';
             if (isZoom && loggedUserId && canSeeZoomLink) {
                 zoomHtml = `

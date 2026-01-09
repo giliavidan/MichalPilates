@@ -325,10 +325,10 @@ background-color:#ae2012;
     color:#76b1c9;
 }
 
-/* שורה קטנה מעל כפתור המתנה */
+/* באיזה מיקום אתה ברשימת המתנה*/
 .waitlist-info {
     font-size: 0.8rem;
-    color: #d35400; /* כתום כהה */
+    color:var(--darkblue); 
     font-weight: bold;
     margin-bottom: 3px;
     text-align: center;
