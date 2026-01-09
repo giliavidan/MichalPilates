@@ -98,7 +98,6 @@
     gap: 8px;
 }
 
-
 /* אפקט hover רק לכרטיסים של אדמין (נקבע ב-JS עם admin-hover) */
 .class-card.admin-hover:hover {
     transform: translateY(-3px);
@@ -194,6 +193,15 @@
     border-color: #a93226;
 }
 
+/* באיזה מיקום אתה ברשימת המתנה*/
+.waitlist-info {
+    font-size: 0.8rem;
+    color:var(--darkblue); 
+    font-weight:500;
+    margin-bottom: 3px;
+    text-align: center;
+}
+
 .register-btn,
 .register-btn-waitlist,
 .register-btn.registered {
@@ -235,10 +243,38 @@
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
+/*הכותרת של החלון יצירת שיעור חדש*/
+.custom-modal-header { 
+    display: flex;
+    flex-direction: row;           /* הסדר הרגיל: כותרת מימין, X בשמאל */
+    justify-content: space-between;
+    align-items: center;
+}
+
+.custom-modal-header .btn-close { /*האיקס לסגירת החלון ליצירת שיעור*/
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.zoom-check-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    flex-direction: row-reverse;
+}
+
+/* עיצוב הצ'ק בוקס */
+#isZoom {
+    width: 20px;          
+    height: 20px;
+    border: 1px solid var(--darkgray);   
+    border-radius: 4px;        
+}
+
 #btn-add-class-mode:hover {
     background-color: var(--darkerOliveGreen);
 }
-
 
 /* מיכל כפתורי הניהול בתוך הכרטיסייה (עריכה ומחיקה) */
 .admin-actions {
@@ -257,19 +293,19 @@
     font-size: 0.9rem;
     cursor: pointer;
     border-color: var(--chocolate);
-   color: var(--lightbeigh0);
+    color: var(--lightbeigh0);
     font-weight: bold;
     transition: opacity 0.2s;
 }
 
 /*כפתור עריכה*/
 .btn-admin-edit {
- background-color:var(--darkerOliveGreen);
+    background-color:var(--darkerOliveGreen);
 }
 
 /*כפתור מחיקה*/
 .btn-admin-delete {
-background-color:#ae2012;
+    background-color:#ae2012;
 }
 
 .btn-admin-edit:hover, .btn-admin-delete:hover {
@@ -325,14 +361,6 @@ background-color:#ae2012;
     color:#76b1c9;
 }
 
-/* באיזה מיקום אתה ברשימת המתנה*/
-.waitlist-info {
-    font-size: 0.8rem;
-    color:var(--darkblue); 
-    font-weight: bold;
-    margin-bottom: 3px;
-    text-align: center;
-}
 
 /* --- עיצוב פאנל ניהול שיעור) --- */
 
@@ -383,3 +411,5 @@ background-color:#ae2012;
     color: white;
     transform: scale(1.1); 
 }
+
+

@@ -1,6 +1,6 @@
 let currentWeekOffset = 0;
-let fetchedClasses = []; 
-let currentManagingClassId = null; 
+let fetchedClasses = [];
+let currentManagingClassId = null;
 
 const role = sessionStorage.getItem('userRole');
 const isAdmin = (role === 'admin');
@@ -12,9 +12,9 @@ function checkUrlForDate() {
     if (dateParam) {
         const targetDate = new Date(dateParam);
         const today = new Date();
-        
-        targetDate.setHours(0,0,0,0);
-        today.setHours(0,0,0,0);
+
+        targetDate.setHours(0, 0, 0, 0);
+        today.setHours(0, 0, 0, 0);
 
         const targetSunday = new Date(targetDate);
         targetSunday.setDate(targetDate.getDate() - targetDate.getDay());
@@ -30,16 +30,16 @@ function checkUrlForDate() {
 }
 checkUrlForDate();
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     loadData();
 
     const addBtn = document.getElementById('btn-add-class-mode');
-    if(addBtn) addBtn.onclick = () => openModal(); 
+    if (addBtn) addBtn.onclick = () => openModal();
 
     const startTimeInput = document.getElementById('startTime');
     const endTimeInput = document.getElementById('endTime');
     if (startTimeInput && endTimeInput) {
-        startTimeInput.addEventListener('change', function() {
+        startTimeInput.addEventListener('change', function () {
             if (!this.value) return;
             const [hours, minutes] = this.value.split(':').map(Number);
             let endHours = hours + 1;
@@ -68,7 +68,7 @@ function loadData() {
     ]).then(([classesData, messagesData]) => {
         fetchedClasses = classesData;
         renderSchedule(fetchedClasses, messagesData);
-        
+
         if (isAdmin && currentManagingClassId) {
             loadManagerData(currentManagingClassId);
         }
@@ -102,7 +102,10 @@ function renderSchedule(classes, notices) {
     setWeeklyDates();
     for (let i = 0; i <= 6; i++) {
         const el = document.getElementById(`day-content-${i}`);
-        if (el) { el.innerHTML = ''; if (i === 6) el.innerHTML = '<p class="text-center mt-3 text-muted">מנוחה</p>'; }
+        if (el) {
+            el.innerHTML = '';
+            if (i === 6) el.innerHTML = '<p class="text-center mt-3 text-muted">מנוחה</p>';
+        }
     }
 
     const loggedUserId = sessionStorage.getItem('userId');
@@ -115,20 +118,20 @@ function renderSchedule(classes, notices) {
     for (let i = 0; i <= 6; i++) {
         const dayContainer = document.getElementById(`day-content-${i}`);
         if (!dayContainer) continue;
-        const columnDate = dayContainer.getAttribute('data-date'); 
+        const columnDate = dayContainer.getAttribute('data-date');
 
         const relevantClasses = classes.filter(c => formatDateForInput(c.class_date) === columnDate);
         relevantClasses.sort((a, b) => a.start_time.localeCompare(b.start_time));
 
         relevantClasses.forEach(cls => {
             const isZoom = !!cls.zoom;
-            const userStatus = cls.user_status; 
+            const userStatus = cls.user_status;
             const currentCount = cls.current_participants || 0;
             const maxCount = cls.max_participants;
             const isFull = currentCount >= maxCount;
 
             let actionHtml = '';
-            
+
             if (isAdmin) {
                 actionHtml = `
                     <div class="admin-actions">
@@ -143,25 +146,24 @@ function renderSchedule(classes, notices) {
                         actionHtml = `<button class="register-btn registered" onclick="cancelRegistration(${cls.id})">רשום ✓ (ביטול)</button>`;
                     } else if (userStatus === 'waitlist') {
                         actionHtml = `
-                            <div class="waitlist-info">את/ה במקום ה ${cls.waitlist_position} ברשימת המתנה</div>
+                            <div class="waitlist-info">את/ה במקום ה ${cls.waitlist_position} ברשימת המתנה </div>
                             <button class="register-btn-waitlist" onclick="cancelRegistration(${cls.id})">ביטול המתנה</button>
                         `;
                     } else {
                         if (!isZoom && isFull) {
-                             actionHtml = `<button class="register-btn-waitlist" onclick="registerForClass(${cls.id}, true)">הרשמה להמתנה</button>`;
+                            actionHtml = `<button class="register-btn-waitlist" onclick="registerForClass(${cls.id}, true)">הרשמה להמתנה</button>`;
                         } else {
-                             actionHtml = `<button class="register-btn" onclick="registerForClass(${cls.id}, false)">הרשמה לשיעור</button>`;
+                            actionHtml = `<button class="register-btn" onclick="registerForClass(${cls.id}, false)">הרשמה לשיעור</button>`;
                         }
                     }
                 }
             }
 
-            // ZOOM –רק לשיעור זום, רק למשתמש מחובר, ורק עם מנוי מתאים יראה
             let zoomHtml = '';
-            if (isZoom && loggedUserId && canSeeZoomLink) {
+            if (isZoom && loggedUserId && (canSeeZoomLink || isAdmin)) {
                 zoomHtml = `
-                    <a href="https://us02web.zoom.us/j/3430100607" 
-                       target="_blank" 
+                    <a href="https://us02web.zoom.us/j/3430100607"
+                       target="_blank"
                        class="zoom-tag"
                        onclick="event.stopPropagation()">
                        ZOOM
@@ -179,13 +181,13 @@ function renderSchedule(classes, notices) {
             card.className = 'class-card';
 
             if (isAdmin) {
-                card.classList.add('admin-hover');   // אפקט hover רק לאדמין
+                card.classList.add('admin-hover');
                 card.style.cursor = 'pointer';
-                card.onclick = () => openClassManager(cls.id); 
+                card.onclick = () => openClassManager(cls.id);
                 card.setAttribute('title', 'לחצי לפתיחת ניהול משתתפים');
             }
 
-            const timeRange = `${cls.start_time.substring(0,5)} - ${cls.end_time.substring(0,5)}`;
+            const timeRange = `${cls.start_time.substring(0, 5)} - ${cls.end_time.substring(0, 5)}`;
 
             card.innerHTML = `
                 <div class="class-time fw-bold" style="direction:ltr;">${timeRange}</div>
@@ -208,11 +210,11 @@ function renderSchedule(classes, notices) {
 
 function openClassManager(classId) {
     if (!isAdmin) return;
-    
+
     currentManagingClassId = classId;
     const cls = fetchedClasses.find(c => c.id === classId);
-    
-    let israeliDate = cls.class_date; 
+
+    let israeliDate = cls.class_date;
     let realDayName = "";
 
     if (cls.class_date && cls.class_date.includes('-')) {
@@ -222,8 +224,8 @@ function openClassManager(classId) {
         const day = parseInt(parts[2]);
 
         israeliDate = `${parts[2]}-${parts[1]}-${parts[0]}`;
-        
-        const dateObj = new Date(year, month, day); 
+
+        const dateObj = new Date(year, month, day);
         const days = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
         realDayName = days[dateObj.getDay()];
     } else {
@@ -231,8 +233,9 @@ function openClassManager(classId) {
     }
 
     document.getElementById('manager-class-name').innerText = cls.class_name;
-    document.getElementById('manager-class-time').innerText = `יום ${realDayName} | ${israeliDate} | ${cls.start_time.substring(0,5)}`;
-    
+    document.getElementById('manager-class-time').innerText =
+        `יום ${realDayName} | ${israeliDate} | ${cls.start_time.substring(0, 5)}`;
+
     const managerDiv = document.getElementById('admin-class-manager');
     managerDiv.style.display = 'block';
     managerDiv.scrollIntoView({ behavior: 'smooth' });
@@ -261,14 +264,14 @@ function loadManagerData(classId) {
             const waitList = document.getElementById('list-waitlist');
             regList.innerHTML = '';
             waitList.innerHTML = '';
-            
+
             let regCount = 0;
             let waitCount = 0;
 
             participants.forEach(p => {
                 const li = document.createElement('li');
                 li.className = 'list-group-item';
-                
+
                 const deleteBtn = `<button class="btn-remove-user" onclick="adminRemoveUser('${p.email}', ${classId})" title="הסר מהשיעור">X</button>`;
 
                 li.innerHTML = `
@@ -297,21 +300,21 @@ function adminRemoveUser(userEmail, classId) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId: userEmail, classId: classId })
         })
-        .then(res => res.json())
-        .then(data => {
-            if(data.success) {
-                loadData(); 
-            } else {
-                showMessage('שגיאה במחיקה');
-            }
-        });
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    loadData();
+                } else {
+                    showMessage('שגיאה במחיקה');
+                }
+            });
     });
 }
 
 function adminAddUserToClass() {
     const select = document.getElementById('all-users-select');
     const userEmail = select.value;
-    
+
     if (!userEmail) {
         showMessage('יש לבחור מתעמלת מהרשימה');
         return;
@@ -323,16 +326,16 @@ function adminAddUserToClass() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: userEmail, classId: currentManagingClassId })
     })
-    .then(res => res.json())
-    .then(data => {
-        if(data.success) {
-            showMessage('הוספה בוצעה בהצלחה');
-            loadData(); 
-            select.value = ""; 
-        } else {
-            showMessage(data.message);
-        }
-    });
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                showMessage('הוספה בוצעה בהצלחה');
+                loadData();
+                select.value = "";
+            } else {
+                showMessage(data.message);
+            }
+        });
 }
 
 // ===================== לוגיקת משתמש רגיל =====================
@@ -352,7 +355,6 @@ function registerForClass(classId, isWaitlist) {
     const membershipType = localStorage.getItem('userMembershipType') || 'guest';
     const isZoomClass = !!classItem.zoom;
 
-    // מנוי זום בלבד – לא נרשם לשום שיעור, רק הודעות מתאימות
     if (membershipType === 'zoom') {
         if (isZoomClass) {
             showMessage("מנוי זום לא צריך להירשם לשיעור.\nתיכנס לשיעור 5 דקות לפני שהשיעור מתחיל");
@@ -366,9 +368,9 @@ function registerForClass(classId, isWaitlist) {
     if (membershipType === 'gym_1perweek') weeklyLimit = 1;
     if (membershipType === 'gym_2perweek') weeklyLimit = 2;
 
-    if (weeklyLimit !== Infinity) { 
-        const targetDate = new Date(classItem.class_date); 
-        const dayOfTarget = targetDate.getDay(); 
+    if (weeklyLimit !== Infinity) {
+        const targetDate = new Date(classItem.class_date);
+        const dayOfTarget = targetDate.getDay();
         const startOfWeek = new Date(targetDate);
         startOfWeek.setDate(targetDate.getDate() - dayOfTarget);
         const endOfWeek = new Date(startOfWeek);
@@ -376,7 +378,7 @@ function registerForClass(classId, isWaitlist) {
 
         let registeredCount = 0;
         fetchedClasses.forEach(c => {
-            if (c.user_status === 'registered') { 
+            if (c.user_status === 'registered') {
                 const cDate = new Date(c.class_date);
                 if (cDate >= startOfWeek && cDate <= endOfWeek) {
                     registeredCount++;
@@ -386,7 +388,7 @@ function registerForClass(classId, isWaitlist) {
 
         if (registeredCount >= weeklyLimit) {
             showMessage(`הגעת למכסת השיעורים השבועית שלך (${weeklyLimit} בשבוע).\nלא ניתן להירשם לשיעור נוסף השבוע.`);
-            return; 
+            return;
         }
     }
 
@@ -395,13 +397,13 @@ function registerForClass(classId, isWaitlist) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: uId, classId: classId })
     })
-    .then(res => res.json())
-    .then(data => {
-        showMessage(data.message);
-        if (data.success) {
-            loadData();
-        }
-    });
+        .then(res => res.json())
+        .then(data => {
+            showMessage(data.message);
+            if (data.success) {
+                loadData();
+            }
+        });
 }
 
 function cancelRegistration(classId) {
@@ -412,14 +414,14 @@ function cancelRegistration(classId) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId: uId, classId: classId })
         })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                loadData();
-            } else {
-                showMessage('שגיאה בביטול');
-            }
-        });
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    loadData();
+                } else {
+                    showMessage('שגיאה בביטול');
+                }
+            });
     });
 }
 
@@ -431,7 +433,7 @@ function showParticipants(element, classId) {
         .then(res => res.json())
         .then(users => {
             const registeredOnly = users.filter(u => u.status === 'registered');
-            
+
             if (registeredOnly.length === 0) {
                 tooltip.innerHTML = "אין רשומים עדיין";
             } else {
@@ -469,9 +471,13 @@ function changeWeek(direction) {
     loadData();
 }
 
+// ===== openModal עם עדכון יום לפי תאריך =====
+
 function openModal(classId = null) {
     const modalElement = document.getElementById('classModal');
     const modalTitle = document.getElementById('modalTitle');
+    const dateInput  = document.getElementById('classDate');
+    const daySelect  = document.getElementById('classDay');
     document.getElementById('formClass').reset();
 
     if (classId) {
@@ -479,18 +485,34 @@ function openModal(classId = null) {
         const cls = fetchedClasses.find(c => c.id === classId);
         document.getElementById('classId').value = cls.id;
         document.getElementById('className').value = cls.class_name;
-        document.getElementById('classDate').value = formatDateForInput(cls.class_date);
-        document.getElementById('classDay').value = cls.day_of_week;
+        dateInput.value = formatDateForInput(cls.class_date);
+        daySelect.value = cls.day_of_week;
         document.getElementById('startTime').value = cls.start_time.substring(0, 5);
         document.getElementById('endTime').value = cls.end_time.substring(0, 5);
         document.getElementById('maxParticipants').value = cls.max_participants;
         document.getElementById('isZoom').checked = cls.zoom;
     } else {
         modalTitle.innerText = "הוספת שיעור חדש";
-        document.getElementById('classId').value = ""; 
-        document.getElementById('classDate').value = formatDateForInput(new Date());
+        document.getElementById('classId').value = "";
+
+        const today = new Date();
+        dateInput.value = formatDateForInput(today);
+
+        const daysNames = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+        const todayName = daysNames[today.getDay()];
+        daySelect.value = todayName;
+
         document.getElementById('maxParticipants').value = 8;
     }
+
+    const daysNames = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+    dateInput.onchange = function () {
+        if (!this.value) return;
+        const d = new Date(this.value);
+        const dayName = daysNames[d.getDay()];
+        daySelect.value = dayName;
+    };
+
     const modal = new bootstrap.Modal(modalElement);
     modal.show();
 }
@@ -498,7 +520,7 @@ function openModal(classId = null) {
 function submitClassForm() {
     const classId = document.getElementById('classId').value;
     const classData = {
-        id: classId, 
+        id: classId,
         className: document.getElementById('className').value,
         classDate: document.getElementById('classDate').value,
         dayOfWeek: document.getElementById('classDay').value,
@@ -510,18 +532,22 @@ function submitClassForm() {
     };
     const url = classId ? '/update-class' : '/add-class';
     const method = classId ? 'PUT' : 'POST';
-    fetch(url, { method: method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(classData) })
-    .then(res => res.json()).then(data => {
-        if (data.success) {
-            showMessage(data.message || 'נשמר בהצלחה');
-            const modalEl = document.getElementById('classModal');
-            const modalInstance = bootstrap.Modal.getInstance(modalEl);
-            if (modalInstance) modalInstance.hide();
-            loadData(); 
-        } else {
-            showMessage('שגיאה');
-        }
-    });
+    fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(classData)
+    })
+        .then(res => res.json()).then(data => {
+            if (data.success) {
+                showMessage(data.message || 'נשמר בהצלחה');
+                const modalEl = document.getElementById('classModal');
+                const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                if (modalInstance) modalInstance.hide();
+                loadData();
+            } else {
+                showMessage('שגיאה');
+            }
+        });
 }
 
 function deleteClass(id) {
@@ -534,9 +560,14 @@ function deleteClass(id) {
 
 function addNewNotice() {
     const content = document.getElementById('newNoticeInput').value;
-    if(!content) return;
-    fetch('/add-message', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content }) }).then(() => {
-        document.getElementById('newNoticeInput').value = ''; loadData();
+    if (!content) return;
+    fetch('/add-message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content })
+    }).then(() => {
+        document.getElementById('newNoticeInput').value = '';
+        loadData();
     });
 }
 

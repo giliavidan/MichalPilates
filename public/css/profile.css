@@ -90,7 +90,7 @@
 
 /* --- כפתור ביטול שיעור (במקום עיצוב ב-JS) --- */
 .btn-cancel-class {
-    width: 100%;
+    width:15%;
     margin-top: 10px;
     padding: 5px 10px;
     font-size: 0.85rem;
