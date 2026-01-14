@@ -24,17 +24,26 @@
         <div id="notices-container"></div>
     </div>
 
-    <div class="week-navigation">
+<div class="week-navigation">
+    <div class="nav-slot nav-slot-prev">
         <button class="nav-btn btn" onclick="changeWeek(-1)">
             <i class="fas fa-chevron-right"></i> שבוע שעבר
         </button>
+    </div>
+
+    <div class="nav-slot nav-slot-current">
         <button class="nav-btn btn" onclick="goToCurrentWeek()">
             שבוע נוכחי
         </button>
-        <button class="nav-btn btn" onclick="changeWeek(1)">
+    </div>
+
+    <div class="nav-slot nav-slot-next">
+        <button id="btn-next-week" class="nav-btn btn" onclick="changeWeek(1)">
             שבוע הבא <i class="fas fa-chevron-left"></i>
         </button>
     </div>
+</div>
+
     
     <div class="schedule-container text-start">
         <button id="btn-add-class-mode" class="btn btn-success" style="display: none;">
@@ -43,7 +52,7 @@
 
         <!-- כפתור אדמין: יצירת מערכת לשבוע שמוצג כרגע -->
         <button id="btn-generate-next-week" class="btn btn-primary" style="display: none;">
-            צור מערכת לשבוע המוצג
+           צרי מערכת לשבוע המוצג
         </button>
     </div>
 

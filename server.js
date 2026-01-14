@@ -25,46 +25,44 @@ const db = mysql.createConnection({
 const dayNames = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי'];
 
 /**
- * יוצרת שיעורים לפי classes_templates לשבוע אחד בלבד
- * (7 ימים החל מ‑startDate).
+ * פונקציה מתוקנת: מייצרת שיעורים ל-7 ימים החל מ-startDateStr.
+ * מונעת בעיות Timezone על ידי פירוק ידני של המחרוזת.
  */
-function generateClassesForWeek(startDate, callback) {
+function generateClassesForWeek(startDateStr, callback) {
   const sqlTemplates = 'SELECT * FROM classes_templates';
 
   db.query(sqlTemplates, (err, templates) => {
     if (err) return callback(err);
 
     const inserts = [];
-    const start = new Date(startDate);
-    start.setHours(0, 0, 0, 0);
-    const end = new Date(start);
-    end.setDate(start.getDate() + 6); // 7 ימים
-    end.setHours(23, 59, 59, 999);
+    const [year, month, day] = startDateStr.split('-').map(Number);
+    const current = new Date(year, month - 1, day); 
 
-    const current = new Date(start);
-
-    while (current <= end) {
-      const jsDay = current.getDay(); // 0 = ראשון
-      const hebDay = dayNames[jsDay]; // שבת לא קיימת במערך
-      const dateStr = current.toISOString().split('T')[0]; // YYYY-MM-DD
+    for (let i = 0; i < 7; i++) {
+      const jsDay = current.getDay(); 
+      const hebDay = dayNames[jsDay]; 
+      
+      const y = current.getFullYear();
+      const m = String(current.getMonth() + 1).padStart(2, '0');
+      const d = String(current.getDate()).padStart(2, '0');
+      const dateStr = `${y}-${m}-${d}`;
 
       if (hebDay) {
         templates
           .filter(t => t.day_of_week === hebDay)
           .forEach(t => {
             inserts.push([
-              t.default_name,             // class_name
-              dateStr,                    // class_date
-              hebDay,                     // day_of_week
-              t.start_time,               // start_time
-              t.end_time,                 // end_time
-              'מיכל',                     // instructor
-              t.default_zoom,             // zoom
-              t.default_max_participants  // max_participants
+              t.default_name,
+              dateStr,
+              hebDay,
+              t.start_time,
+              t.end_time,
+              'מיכל',
+              t.default_zoom,
+              t.default_max_participants
             ]);
           });
       }
-
       current.setDate(current.getDate() + 1);
     }
 
@@ -85,32 +83,23 @@ function generateClassesForWeek(startDate, callback) {
   });
 }
 
-/**
- * פונקציה ישנה – לא חובה להשתמש בה (שבוע הבא קלאסי)
- * נשארת למקרה שתרצי בעתיד, אבל לא קוראים לה כרגע.
- */
 function generateNextWeekClasses(callback) {
   const today = new Date();
-  const day = today.getDay(); // 0=ראשון, 1=שני...
-
+  const day = today.getDay(); 
   const diffToNextSunday = (7 - day) % 7 || 7;
   const start = new Date(today);
   start.setDate(today.getDate() + diffToNextSunday);
   start.setHours(0, 0, 0, 0);
 
-  const end = new Date(start);
-  end.setDate(start.getDate() + 6); // עד שבת
-
-  generateClassesForWeek(start.toISOString().split('T')[0], callback);
+  const startStr = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-${String(start.getDate()).padStart(2, '0')}`;
+  generateClassesForWeek(startStr, callback);
 }
 
-// --- התחברות ל‑DB (ללא יצירת שיעורים אוטומטית) ---
 db.connect((err) => {
   if (err) {
     console.error('Error connecting to MySQL:', err);
   } else {
     console.log('Connected to MySQL Database!');
-    // יצירת השיעורים תהיה רק לפי כפתור אדמין
   }
 });
 
@@ -171,7 +160,6 @@ app.get('/logout', (req, res) => {
   res.json({ success: true, message: 'התנתקת מהמערכת' });
 });
 
-// --- בדיקת חיבור לפי העוגייה ---
 app.get('/api/check-session', (req, res) => {
   const email = req.cookies.userSession;
   if (!email) {
@@ -208,7 +196,6 @@ app.get('/api/user-info', (req, res) => {
   });
 });
 
-// עדכון פרטים
 app.put('/api/update-user', (req, res) => {
   const { email, firstName, lastName, phone, city, birthdate } = req.body;
   const query = `UPDATE users SET first_name=?, last_name=?, phone=?, city=?, birthdate=? WHERE email=?`;
@@ -309,7 +296,6 @@ app.get('/classes', (req, res) => {
   });
 });
 
-// השבוע האחרון שקיים במערכת השעות – בשביל חסימת דפדוף קדימה לשבועות ריקים
 app.get('/api/max-class-date', (req, res) => {
   const query = 'SELECT MAX(class_date) AS maxDate FROM classes';
   db.query(query, (err, results) => {
@@ -328,24 +314,21 @@ app.delete('/delete-class/:id', (req, res) => {
   });
 });
 
-// יצירת שיעורים לשבוע שמוצג במסך (קולט רק startDate של יום ראשון)
 app.post('/admin/generate-week-range', (req, res) => {
-  const { startDate } = req.body; // YYYY-MM-DD של יום ראשון בשבוע המוצג
+  const { startDate } = req.body; 
 
   if (!startDate) {
     return res.status(400).json({ success: false, message: 'חסר תאריך התחלה' });
   }
 
-  const start = new Date(startDate);
-  start.setHours(0, 0, 0, 0);
-  const end = new Date(start);
-  end.setDate(start.getDate() + 6); // 7 ימים בלבד
-  end.setHours(23, 59, 59, 999);
+  const [year, month, day] = startDate.split('-').map(Number);
+  const startObj = new Date(year, month - 1, day);
+  const endObj = new Date(startObj);
+  endObj.setDate(startObj.getDate() + 6);
 
-  const startStr = start.toISOString().split('T')[0];
-  const endStr   = end.toISOString().split('T')[0];
+  const startStr = startDate;
+  const endStr   = `${endObj.getFullYear()}-${String(endObj.getMonth() + 1).padStart(2, '0')}-${String(endObj.getDate()).padStart(2, '0')}`;
 
-  // בודקים אם כבר יש שיעורים בשבוע הזה
   const checkSql = `
     SELECT COUNT(*) AS cnt
     FROM classes
@@ -364,7 +347,6 @@ app.post('/admin/generate-week-range', (req, res) => {
       });
     }
 
-    // אם השבוע ריק – מייצרים לפי התבניות, רק לשבוע הזה
     generateClassesForWeek(startStr, (err2) => {
       if (err2) {
         console.error(err2);

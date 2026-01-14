@@ -12,23 +12,24 @@ function checkUrlForDate() {
 
     if (dateParam) {
         const targetDate = new Date(dateParam);
-        const today = new Date();
+        const today      = new Date();
 
         targetDate.setHours(0, 0, 0, 0);
         today.setHours(0, 0, 0, 0);
 
         const targetSunday = new Date(targetDate);
-        targetSunday.setDate(targetDate.getDate() - targetDate.getDay());
+        targetSunday.setDate(targetDate.getDate() - targetDate.getDay()); // 0=ראשון
 
         const currentSunday = new Date(today);
         currentSunday.setDate(today.getDate() - today.getDay());
 
-        const diffTime = targetSunday - currentSunday;
+        const diffTime  = targetSunday - currentSunday;
         const diffWeeks = Math.round(diffTime / (1000 * 60 * 60 * 24 * 7));
 
         currentWeekOffset = diffWeeks;
     }
 }
+
 checkUrlForDate();
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -45,8 +46,7 @@ document.addEventListener('DOMContentLoaded', function () {
         startTimeInput.addEventListener('change', function () {
             if (!this.value) return;
             const [hours, minutes] = this.value.split(':').map(Number);
-            let endHours = hours + 1;
-            if (endHours >= 24) endHours = endHours - 24;
+            let endHours = (hours + 1) % 24;
             const formattedEnd = `${String(endHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
             endTimeInput.value = formattedEnd;
         });
@@ -117,50 +117,53 @@ function renderSchedule(classes, notices) {
     const addClassBtn = document.getElementById('btn-add-class-mode');
     if (addClassBtn) addClassBtn.style.display = isAdmin ? 'block' : 'none';
 
-   // כפתור אדמין: יצירת שיעורים לשבוע שמוצג כרגע
-const genNextWeekBtn = document.getElementById('btn-generate-next-week');
-if (genNextWeekBtn) {
-    genNextWeekBtn.style.display = isAdmin ? 'block' : 'none';
-    genNextWeekBtn.onclick = () => {
-        showConfirm(
-            'האם ליצור מערכת שעות לשבוע המוצג כעת?',
-            function onConfirm() {
-                // חישוב תחילת השבוע שמוצג כרגע (יום ראשון)
-                const today = new Date();
-                const baseDate = new Date();
-                baseDate.setDate(today.getDate() + (currentWeekOffset * 7));
-                const startOfWeek = new Date(baseDate);
-                startOfWeek.setDate(baseDate.getDate() - baseDate.getDay());
-                startOfWeek.setHours(0, 0, 0, 0);
+    // כפתור אדמין: יצירת שיעורים לשבוע שמוצג כרגע
+    const genNextWeekBtn = document.getElementById('btn-generate-next-week');
+    if (genNextWeekBtn) {
+        genNextWeekBtn.style.display = isAdmin ? 'block' : 'none';
+        genNextWeekBtn.onclick = () => {
+            showConfirm(
+                'האם ליצור מערכת שעות לשבוע המוצג כעת?',
+                function onConfirm() {
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const baseDate = new Date(today);
+                    baseDate.setDate(today.getDate() + (currentWeekOffset * 7));
+                    const dayIndex = baseDate.getDay(); 
+                    const startOfWeek = new Date(baseDate);
+                    startOfWeek.setDate(baseDate.getDate() - dayIndex);
+                    
+                    const y = startOfWeek.getFullYear();
+                    const m = String(startOfWeek.getMonth() + 1).padStart(2, '0');
+                    const d = String(startOfWeek.getDate()).padStart(2, '0');
+                    const formattedStartDate = `${y}-${m}-${d}`;
 
-                fetch('/admin/generate-week-range', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        startDate: formatDateForInput(startOfWeek) // שולחים רק תחילת שבוע
+                    fetch('/admin/generate-week-range', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            startDate: formattedStartDate 
+                        })
                     })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        loadMaxClassDate().then(() => loadData());
-                    } else {
-                        showMessage(data.message || 'שגיאה ביצירת מערכת השעות לשבוע זה');
-                    }
-                })
-                .catch(() => {
-                    showMessage('שגיאה ביצירת מערכת השעות לשבוע זה');
-                });
-            },
-            function onCancel() {}
-        );
-    };
-}
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            loadMaxClassDate().then(() => loadData());
+                        } else {
+                            showMessage(data.message || 'שגיאה ביצירת מערכת השעות לשבוע זה');
+                        }
+                    })
+                    .catch(() => {
+                        showMessage('שגיאה ביצירת מערכת השעות לשבוע זה');
+                    });
+                }
+            );
+        };
+    }
 
-    // קובע תאריכים + שם יום לכל עמודה
     setWeeklyDates();
+    updateNextWeekButtonVisibility(); // עדכון כפתור שבוע הבא לפי maxClassDate
 
-    // מנקה כל העמודות
     for (let i = 0; i <= 5; i++) {
         const el = document.getElementById(`day-content-${i}`);
         if (el) {
@@ -175,17 +178,33 @@ if (genNextWeekBtn) {
         membershipType === 'gym_2perweek' ||
         membershipType === 'zoom';
 
-    // ***** לולאת ימים ראשון–שישי *****
     for (let i = 0; i <= 5; i++) {
         const dayContainer = document.getElementById(`day-content-${i}`);
         if (!dayContainer) continue;
 
-        // שם היום לעמודה (ראשון/שני/...)
         const columnDayName = dayContainer.getAttribute('data-dayname');
+        
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        const base = new Date(today);
+        base.setDate(today.getDate() + (currentWeekOffset * 7));
+        const dayIndexView = base.getDay(); 
+        const startOfWeekView = new Date(base);
+        startOfWeekView.setDate(base.getDate() - dayIndexView);
+        
+        const endOfWeekView = new Date(startOfWeekView);
+        endOfWeekView.setDate(startOfWeekView.getDate() + 6);
+        endOfWeekView.setHours(23, 59, 59, 999);
 
-        // סינון לפי יום בשבוע מה‑DB
         const relevantClasses = classes
-            .filter(c => c.day_of_week === columnDayName)
+            .filter(c => {
+                const cDate = new Date(c.class_date);
+                return (
+                    c.day_of_week === columnDayName &&
+                    cDate >= startOfWeekView &&
+                    cDate <= endOfWeekView
+                );
+            })
             .sort((a, b) => a.start_time.localeCompare(b.start_time));
 
         relevantClasses.forEach(cls => {
@@ -258,7 +277,7 @@ if (genNextWeekBtn) {
                 <div class="class-time fw-bold" style="direction:ltr;">${timeRange}</div>
                 <div class="class-name">${cls.class_name}</div>
                 <div class="class-instructor small text-muted">${cls.instructor}</div>
-                <div class="class-details mt-1 d-flex justify-content-between	align-items-center">
+                <div class="class-details mt-1 d-flex justify-content-between align-items-center">
                     ${countDisplay}
                     ${zoomHtml}
                 </div>
@@ -516,10 +535,14 @@ function showParticipants(element, classId) {
 
 function setWeeklyDates() {
     const today = new Date();
-    const currentViewDate = new Date();
+    today.setHours(0,0,0,0);
+
+    const currentViewDate = new Date(today);
     currentViewDate.setDate(today.getDate() + (currentWeekOffset * 7));
+
+    const dayIndex = currentViewDate.getDay(); // 0..6
     const startOfWeek = new Date(currentViewDate);
-    startOfWeek.setDate(currentViewDate.getDate() - currentViewDate.getDay());
+    startOfWeek.setDate(currentViewDate.getDate() - dayIndex); // לזוז אחורה ליום ראשון
 
     const daysNames = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי'];
 
@@ -538,20 +561,18 @@ function setWeeklyDates() {
     }
 }
 
+// חסימת דפדוף קדימה לפי האם יש שיעורים מוגדרים קדימה
 function changeWeek(direction) {
-    // למי שאינו אדמין – לא לעבור מעבר לשבוע האחרון שיש בו שיעור
     if (!isAdmin && direction > 0 && maxClassDate) {
         const today = new Date();
-        const targetViewDate = new Date();
-        targetViewDate.setDate(today.getDate() + ((currentWeekOffset + direction) * 7));
-        const startOfWeek = new Date(targetViewDate);
-        startOfWeek.setDate(targetViewDate.getDate() - targetViewDate.getDay());
-        const weekEnd = new Date(startOfWeek);
-        weekEnd.setDate(startOfWeek.getDate() + 6);
-        const weekEndStr = formatDateForInput(weekEnd);
+        today.setHours(0, 0, 0, 0);
 
-        if (weekEndStr > maxClassDate) {
-            return; // למשתמש רגיל – לא לזוז קדימה לשבוע ריק
+        const targetViewDate = new Date(today);
+        targetViewDate.setDate(today.getDate() + ((currentWeekOffset + direction) * 7));
+
+        const targetStr = formatDateForInput(targetViewDate);
+        if (targetStr > maxClassDate) {
+            return;
         }
     }
 
@@ -559,10 +580,51 @@ function changeWeek(direction) {
     loadData();
 }
 
-// כפתור "שבוע נוכחי" – מחזיר לתצוגה של השבוע של היום
+// כפתור "שבוע נוכחי"
 function goToCurrentWeek() {
     currentWeekOffset = 0;
     loadData();
+}
+
+// עדכון האם להראות את כפתור "שבוע הבא" למשתמש רגיל
+function updateNextWeekButtonVisibility() {
+    const nextBtn = document.getElementById('btn-next-week');
+    if (!nextBtn) return;
+
+    // אדמין תמיד רואה את הכפתור
+    if (isAdmin) {
+        nextBtn.style.display = 'inline-block';
+        return;
+    }
+
+    // אם אין בכלל שיעורים – אין כפתור
+    if (!maxClassDate) {
+        nextBtn.style.display = 'none';
+        return;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // חישוב תחילת וסוף השבוע שמוצג כרגע
+    const currentViewDate = new Date(today);
+    currentViewDate.setDate(today.getDate() + (currentWeekOffset * 7));
+
+    const dayIndex = currentViewDate.getDay(); // 0=ראשון
+    const startOfWeek = new Date(currentViewDate);
+    startOfWeek.setDate(currentViewDate.getDate() - dayIndex);
+
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+    const endOfWeekStr = formatDateForInput(endOfWeek);
+
+    // אם השיעור האחרון (maxClassDate) נמצא בתוך השבוע הזה או לפניו – אין יותר שבועות עם שיעורים => להסתיר
+    if (endOfWeekStr >= maxClassDate) {
+        nextBtn.style.display = 'none';
+    } else {
+        nextBtn.style.display = 'inline-block';
+    }
 }
 
 // ===== openModal עם עדכון יום לפי תאריך =====
