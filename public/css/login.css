@@ -64,22 +64,6 @@
     background-color: #fff;
 }
 
-/* Forgot password link */
-.forgot-pass {
-    display: block;
-    margin-bottom: 15px;
-    font-size: 14px;
-    color: var(--darkgray);
-    text-decoration: none;
-    text-align: left;
-    transition: color 0.3s;
-}
-
-.forgot-pass:hover {
-    color: var(--button);
-    text-decoration: underline;
-}
-
 /* Login and Register Buttons */
 /* Overwrite the 'global.css' to deal with bootstrap Settings 
 (בהגדרות של הכרטיסייה הייתה בעיה בלחיצה על הכפתור ולכן היינו צריכות לדרוס את העיצוב הכללי) */

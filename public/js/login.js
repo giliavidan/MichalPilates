@@ -1,5 +1,5 @@
-document.addEventListener('DOMContentLoaded', function() {
-    
+document.addEventListener('DOMContentLoaded', function () {
+
     const loginForm = document.getElementById('loginForm');
 
     // מוודאים שהטופס קיים לפני שמוסיפים לו מאזין
@@ -17,43 +17,43 @@ document.addEventListener('DOMContentLoaded', function() {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ 
-                    email: inputEmail, 
-                    password: inputPassword 
+                body: JSON.stringify({
+                    email: inputEmail,
+                    password: inputPassword
                 })
             })
-            .then(response => response.json())
-            .then(data => {
-                // 3. השרת החזיר תשובה. נבדוק אם ההתחברות הצליחה
-                if (data.success) {
-                    
-                    // שמירת פרטי המשתמש ב-SessionStorage (נשמר כל עוד הדפדפן פתוח)
-                    sessionStorage.setItem('userId', data.user.id); // זה המזהה שאיתו נרשמים לשיעורים (האימייל)
-                    sessionStorage.setItem('userFirstName', data.user.firstName);
-                    sessionStorage.setItem('userRole', data.user.role); 
-                    sessionStorage.setItem('isLoggedIn', 'true');
-                    
-                    // שמירת סוג המנוי ב-LocalStorage (כדי שמגבלות הרישום יעבדו גם אם סוגרים את הדפדפן וחוזרים)
-                    if (data.user.membershipType) {
-                        localStorage.setItem('userMembershipType', data.user.membershipType);
-                    }
-                    
-                    // הודעת הצלחה דרך ה‑popup המעוצב
-                    showMessage('היי ' + data.user.firstName + ', התחברת בהצלחה!');
+                .then(response => response.json())
+                .then(data => {
+                    // 3. השרת החזיר תשובה. נבדוק אם ההתחברות הצליחה
+                    if (data.success) {
 
-                    // הפניה לדף הבית אחרי זמן קצר (כדי שיספיקו לראות את ההודעה)
-                    setTimeout(() => {
-                        window.location.href = "index.html";
-                    }, 1200);
-                } else {
-                    // סיסמה / אימייל לא נכונים – הודעה גלובלית
-                    showMessage(data.message || 'שם משתמש או סיסמה שגויים.');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showMessage('שגיאת תקשורת עם השרת');
-            });
+                        // שמירת פרטי המשתמש ב-SessionStorage (נשמר כל עוד הדפדפן פתוח)
+                        sessionStorage.setItem('userId', data.user.id); // זה המזהה שאיתו נרשמים לשיעורים (האימייל)
+                        sessionStorage.setItem('userFirstName', data.user.firstName);
+                        sessionStorage.setItem('userRole', data.user.role);
+                        sessionStorage.setItem('isLoggedIn', 'true');
+
+                        // שמירת סוג המנוי ב-LocalStorage (כדי שמגבלות הרישום יעבדו גם אם סוגרים את הדפדפן וחוזרים)
+                        if (data.user.membershipType) {
+                            localStorage.setItem('userMembershipType', data.user.membershipType);
+                        }
+
+                        // הודעת הצלחה דרך ה‑popup המעוצב
+                        showMessage('היי ' + data.user.firstName + ', התחברת בהצלחה!');
+
+                        // הפניה לדף הבית אחרי זמן קצר (כדי שיספיקו לראות את ההודעה)
+                        setTimeout(() => {
+                            window.location.href = "index.html";
+                        }, 1200);
+                    } else {
+                        // סיסמה / אימייל לא נכונים – הודעה גלובלית
+                        showMessage(data.message || 'שם משתמש או סיסמה שגויים.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showMessage('שגיאת תקשורת עם השרת');
+                });
         });
     }
 });

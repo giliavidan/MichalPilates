@@ -192,29 +192,29 @@ if (registrationForm) {
             },
             body: JSON.stringify(userData)
         })
-        .then(response => {
-            if (response.ok) {
-                // ההרשמה הצליחה!
-                showMessage('ההרשמה בוצעה בהצלחה! מועבר להתחברות...');
-                // מעבר לדף התחברות אחרי סגירת ההודעה
-                const overlay = document.getElementById('global-message-overlay');
-                const okBtn   = document.getElementById('global-message-ok');
-                if (overlay && okBtn) {
-                    okBtn.onclick = function () {
-                        overlay.classList.add('msg-hidden');
+            .then(response => {
+                if (response.ok) {
+                    // ההרשמה הצליחה!
+                    showMessage('ההרשמה בוצעה בהצלחה! מועבר להתחברות...');
+                    // מעבר לדף התחברות אחרי סגירת ההודעה
+                    const overlay = document.getElementById('global-message-overlay');
+                    const okBtn = document.getElementById('global-message-ok');
+                    if (overlay && okBtn) {
+                        okBtn.onclick = function () {
+                            overlay.classList.add('msg-hidden');
+                            window.location.href = 'login.html';
+                        };
+                    } else {
                         window.location.href = 'login.html';
-                    };
+                    }
                 } else {
-                    window.location.href = 'login.html';
+                    // הייתה שגיאה בשרת (למשל אימייל כפול)
+                    return response.text().then(text => { showMessage(text); });
                 }
-            } else {
-                // הייתה שגיאה בשרת (למשל אימייל כפול)
-                return response.text().then(text => { showMessage(text); });
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showMessage('שגיאת תקשורת עם השרת');
-        });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('שגיאת תקשורת עם השרת');
+            });
     });
 }

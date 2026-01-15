@@ -24,10 +24,6 @@ const db = mysql.createConnection({
 // ===== לוגיקת יצירת שיעורים מטבלת התבניות =====
 const dayNames = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי'];
 
-/**
- * פונקציה מתוקנת: מייצרת שיעורים ל-7 ימים החל מ-startDateStr.
- * מונעת בעיות Timezone על ידי פירוק ידני של המחרוזת.
- */
 function generateClassesForWeek(startDateStr, callback) {
   const sqlTemplates = 'SELECT * FROM classes_templates';
 
@@ -36,12 +32,12 @@ function generateClassesForWeek(startDateStr, callback) {
 
     const inserts = [];
     const [year, month, day] = startDateStr.split('-').map(Number);
-    const current = new Date(year, month - 1, day); 
+    const current = new Date(year, month - 1, day);
 
     for (let i = 0; i < 7; i++) {
-      const jsDay = current.getDay(); 
-      const hebDay = dayNames[jsDay]; 
-      
+      const jsDay = current.getDay();
+      const hebDay = dayNames[jsDay];
+
       const y = current.getFullYear();
       const m = String(current.getMonth() + 1).padStart(2, '0');
       const d = String(current.getDate()).padStart(2, '0');
@@ -85,7 +81,7 @@ function generateClassesForWeek(startDateStr, callback) {
 
 function generateNextWeekClasses(callback) {
   const today = new Date();
-  const day = today.getDay(); 
+  const day = today.getDay();
   const diffToNextSunday = (7 - day) % 7 || 7;
   const start = new Date(today);
   start.setDate(today.getDate() + diffToNextSunday);
@@ -210,7 +206,7 @@ app.put('/api/update-user', (req, res) => {
 });
 
 app.get('/all-users', (req, res) => {
-  const query = 'SELECT first_name, last_name, email FROM users ORDER BY first_name ASC';
+  const query = 'SELECT first_name, last_name, email, phone FROM users ORDER BY first_name ASC';
   db.query(query, (err, results) => {
     if (err) res.status(500).send('אירעה שגיאה בטעינת המשתמשים');
     else res.json(results);
@@ -272,6 +268,7 @@ app.put('/update-class', (req, res) => {
   );
 });
 
+// --- כאן השינוי עבור ספירת רשימת המתנה ---
 app.get('/classes', (req, res) => {
   const userId = req.query.userId || 0;
   const query = `
@@ -284,12 +281,13 @@ app.get('/classes', (req, res) => {
            (SELECT COUNT(*)
               FROM registrations r3
              WHERE r3.class_id = c.id
-               AND r3.status = 'waitlist') AS total_waitlist
+               AND r3.status = 'waitlist') AS waitlist_count 
     FROM classes c
     LEFT JOIN registrations r
-           ON c.id = r.class_id AND r.user_id = ?
+            ON c.id = r.class_id AND r.user_id = ?
     ORDER BY c.class_date ASC, c.start_time ASC
   `;
+  // שיניתי את total_waitlist ל-waitlist_count כדי שיתאים ל-frontend
   db.query(query, [userId], (err, results) => {
     if (err) res.status(500).send('אירעה שגיאה בטעינת מערכת השיעורים');
     else res.json(results);
@@ -315,7 +313,7 @@ app.delete('/delete-class/:id', (req, res) => {
 });
 
 app.post('/admin/generate-week-range', (req, res) => {
-  const { startDate } = req.body; 
+  const { startDate } = req.body;
 
   if (!startDate) {
     return res.status(400).json({ success: false, message: 'חסר תאריך התחלה' });
@@ -327,7 +325,7 @@ app.post('/admin/generate-week-range', (req, res) => {
   endObj.setDate(startObj.getDate() + 6);
 
   const startStr = startDate;
-  const endStr   = `${endObj.getFullYear()}-${String(endObj.getMonth() + 1).padStart(2, '0')}-${String(endObj.getDate()).padStart(2, '0')}`;
+  const endStr = `${endObj.getFullYear()}-${String(endObj.getMonth() + 1).padStart(2, '0')}-${String(endObj.getDate()).padStart(2, '0')}`;
 
   const checkSql = `
     SELECT COUNT(*) AS cnt
@@ -370,6 +368,19 @@ app.post('/register-class', (req, res) => {
     }
 
     const cls = results[0];
+
+    // --- בדיקת תקינות זמן (חסימת רישום לשיעור עבר) ---
+    const now = new Date();
+    // פירוק התאריך והשעה כדי לבנות אובייקט Date מדויק
+    const [y, m, d] = cls.class_date.split('-').map(Number);
+    const [h, min] = cls.start_time.split(':').map(Number);
+    const classStart = new Date(y, m - 1, d, h, min);
+
+    if (classStart < now) {
+      return res.json({ success: false, message: 'לא ניתן להירשם לשיעור שכבר התחיל או הסתיים' });
+    }
+    // ------------------------------------------------
+
     const isFull = cls.current_participants >= cls.max_participants;
     const status = isFull ? 'waitlist' : 'registered';
 
@@ -390,8 +401,11 @@ app.post('/register-class', (req, res) => {
   });
 });
 
+// --- כאן השינוי הגדול: קידום אוטומטי מרשימת המתנה ---
 app.post('/cancel-registration', (req, res) => {
   const { userId, classId } = req.body;
+
+  // 1. קודם בודקים מה היה הסטטוס של מי שמבטל
   db.query(
     'SELECT status FROM registrations WHERE user_id = ? AND class_id = ?',
     [userId, classId],
@@ -401,14 +415,44 @@ app.post('/cancel-registration', (req, res) => {
       }
       const oldStatus = results[0].status;
 
+      // 2. מוחקים את הרישום
       db.query(
         'DELETE FROM registrations WHERE user_id = ? AND class_id = ?',
         [userId, classId],
         (err2) => {
           if (err2) return res.json({ success: false, message: 'אירעה שגיאה בביטול הרישום' });
 
+          // 3. אם מי שביטל היה רשום ("registered"), התפנה מקום!
+          // בודקים אם יש מישהו ברשימת המתנה ("waitlist")
           if (oldStatus === 'registered') {
-            db.query('UPDATE classes SET current_participants = current_participants - 1 WHERE id = ?', [classId]);
+            const checkWaitlistSql = `
+              SELECT * FROM registrations 
+              WHERE class_id = ? AND status = 'waitlist' 
+              ORDER BY created_at ASC 
+              LIMIT 1
+            `; // לוקחים את הראשון שנרשם להמתנה
+
+            db.query(checkWaitlistSql, [classId], (err3, waitlistUsers) => {
+              if (!err3 && waitlistUsers.length > 0) {
+                // מצאנו מישהי ברשימת המתנה!
+                const nextUser = waitlistUsers[0];
+
+                // מקדמים אותה ל-registered
+                db.query(
+                  "UPDATE registrations SET status = 'registered' WHERE id = ?",
+                  [nextUser.id],
+                  (err4) => {
+                    if (!err4) {
+                      console.log(`User ${nextUser.user_id} promoted from waitlist for class ${classId}`);
+                      // הערה: לא משנים את current_participants כי אחד יצא ואחד נכנס (המספר נשאר זהה)
+                    }
+                  }
+                );
+              } else {
+                // אין אף אחד ברשימת המתנה - מורידים את מספר המשתתפים ב-1
+                db.query('UPDATE classes SET current_participants = current_participants - 1 WHERE id = ?', [classId]);
+              }
+            });
           }
 
           res.json({ success: true, message: 'הרישום לשיעור בוטל בהצלחה' });
@@ -418,26 +462,64 @@ app.post('/cancel-registration', (req, res) => {
   );
 });
 
+// --- עדכון הודעת שגיאה בהוספת משתמש ---
 app.post('/admin-add-user', (req, res) => {
-  const { userId, classId } = req.body;
+  const { userId, classId, asWaitlist } = req.body; // הוספנו פרמטר asWaitlist
+
+  // 1. בדיקה אם המשתמשת כבר קיימת (רשומה או בהמתנה)
   db.query(
     'SELECT * FROM registrations WHERE user_id = ? AND class_id = ?',
     [userId, classId],
     (err, results) => {
       if (results && results.length > 0) {
-        return res.json({ success: false, message: 'המשתמשת כבר רשומה לשיעור' });
+        return res.json({ success: false, message: 'המתאמן כבר רשום לשיעור זה (או ברשימת המתנה)' });
       }
 
-      db.query(
-        "INSERT INTO registrations (user_id, class_id, status) VALUES (?, ?, 'registered')",
-        [userId, classId],
-        (err2) => {
-          if (err2) return res.json({ success: false, message: 'אירעה שגיאה בהוספת המשתמשת' });
-
-          db.query('UPDATE classes SET current_participants = current_participants + 1 WHERE id = ?', [classId]);
-          res.json({ success: true, message: 'המשתמשת נוספה לשיעור בהצלחה' });
+      // 2. שליפת פרטי השיעור לבדיקת מקום
+      db.query('SELECT current_participants, max_participants FROM classes WHERE id = ?', [classId], (err2, classRes) => {
+        if (err2 || classRes.length === 0) {
+          return res.json({ success: false, message: 'שגיאה בבדיקת נתוני השיעור' });
         }
-      );
+
+        const { current_participants, max_participants } = classRes[0];
+        const isFull = current_participants >= max_participants;
+
+        // --- תרחיש א': המנהלת אישרה להכניס לרשימת המתנה ---
+        if (asWaitlist) {
+          db.query(
+            "INSERT INTO registrations (user_id, class_id, status) VALUES (?, ?, 'waitlist')",
+            [userId, classId],
+            (err3) => {
+              if (err3) return res.json({ success: false, message: 'אירעה שגיאה בהוספה להמתנה' });
+              // לא מעדכנים את current_participants כי זה המתנה
+              res.json({ success: true, message: 'המתאמן נוסף לרשימת ההמתנה בהצלחה' });
+            }
+          );
+        }
+        // --- תרחיש ב': ניסיון הוספה רגיל ---
+        else {
+          if (isFull) {
+            // מחזירים קוד מיוחד כדי שהלקוח ידע לשאול את המנהלת
+            return res.json({
+              success: false,
+              code: 'CLASS_FULL',
+              message: 'השיעור מלא. האם להוסיף לרשימת המתנה?'
+            });
+          }
+
+          // יש מקום -> רושמים רגיל
+          db.query(
+            "INSERT INTO registrations (user_id, class_id, status) VALUES (?, ?, 'registered')",
+            [userId, classId],
+            (err3) => {
+              if (err3) return res.json({ success: false, message: 'אירעה שגיאה בהוספת המתאמן' });
+
+              db.query('UPDATE classes SET current_participants = current_participants + 1 WHERE id = ?', [classId]);
+              res.json({ success: true, message: 'המתאמן נוסף לשיעור בהצלחה' });
+            }
+          );
+        }
+      });
     }
   );
 });

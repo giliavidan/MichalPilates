@@ -49,10 +49,10 @@
 
 .week-grid {
     display: grid;
-    grid-template-columns: repeat(6, 1fr); 
+    grid-template-columns: repeat(6, 1fr);
     gap: 15px;
-    max-width: 1200px;   
-    margin: 0 auto;      
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .day-column {
@@ -196,11 +196,11 @@
     border-color: #a93226;
 }
 
-/* באיזה מיקום אתה ברשימת המתנה*/
+/* באיזה מיקום אתה ברשימת המתנה */
 .waitlist-info {
     font-size: 0.8rem;
-    color:var(--darkblue); 
-    font-weight:500;
+    color: var(--darkblue);
+    font-weight: 500;
     margin-bottom: 3px;
     text-align: center;
 }
@@ -233,7 +233,7 @@
 
 /*כפתור הוספת שיעור*/
 #btn-add-class-mode {
-    background-color:var(--lightOliveGreen); 
+    background-color: var(--lightOliveGreen);
     color: white;
     border: none;
     font-weight: bold;
@@ -243,18 +243,20 @@
     cursor: pointer;
     font-size: 1.1rem;
     transition: background-color 0.3s;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 /*הכותרת של החלון יצירת שיעור חדש*/
-.custom-modal-header { 
+.custom-modal-header {
     display: flex;
-    flex-direction: row;           /* הסדר הרגיל: כותרת מימין, X בשמאל */
+    flex-direction: row;
+    /* הסדר הרגיל: כותרת מימין, X בשמאל */
     justify-content: space-between;
     align-items: center;
 }
 
-.custom-modal-header .btn-close { /*האיקס לסגירת החלון ליצירת שיעור*/
+.custom-modal-header .btn-close {
+    /*האיקס לסגירת החלון ליצירת שיעור*/
     margin-left: 0;
     margin-right: 0;
 }
@@ -269,10 +271,10 @@
 
 /* עיצוב הצ'ק בוקס */
 #isZoom {
-    width: 20px;          
+    width: 20px;
     height: 20px;
-    border: 1px solid var(--darkgray);   
-    border-radius: 4px;        
+    border: 1px solid var(--darkgray);
+    border-radius: 4px;
 }
 
 #btn-add-class-mode:hover {
@@ -282,15 +284,17 @@
 /* מיכל כפתורי הניהול בתוך הכרטיסייה (עריכה ומחיקה) */
 .admin-actions {
     display: flex;
-    gap: 10px; /* רווח בין הכפתורים */
+    gap: 10px;
+    /* רווח בין הכפתורים */
     justify-content: center;
     margin-top: 10px;
 }
 
 /* עיצוב לכפתורי עריכה/מחיקה */
-.btn-admin-edit, .btn-admin-delete {
-    flex: 1; 
-    border:solid transparent 2px;
+.btn-admin-edit,
+.btn-admin-delete {
+    flex: 1;
+    border: solid transparent 2px;
     padding: 3px 0;
     border-radius: 3px;
     font-size: 0.9rem;
@@ -303,16 +307,18 @@
 
 /*כפתור עריכה*/
 .btn-admin-edit {
-    background-color:var(--darkerOliveGreen);
+    background-color: var(--darkerOliveGreen);
 }
 
 /*כפתור מחיקה*/
 .btn-admin-delete {
-    background-color:#ae2012;
+    background-color: #ae2012;
 }
 
-.btn-admin-edit:hover, .btn-admin-delete:hover {
-    opacity: 0.85; /* אפקט הבהרה במעבר עכבר */
+.btn-admin-edit:hover,
+.btn-admin-delete:hover {
+    opacity: 0.85;
+    /* אפקט הבהרה במעבר עכבר */
 }
 
 /* איזור הוספת הודעות לוח (למנהל בלבד) */
@@ -321,7 +327,7 @@
     gap: 10px;
     margin-bottom: 15px;
     padding-bottom: 10px;
-    border-bottom: 1px solid rgba(0,0,0,0.1);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .admin-notice-controls input {
@@ -331,12 +337,14 @@
     border-radius: 4px;
 }
 
-/*רשימת משתתפים*/
+/* ========================================= */
+/* טולטיפ משתתפים (גם רגיל וגם רשימת המתנה) */
+/* ========================================= */
 .participants-tooltip-container {
     position: relative;
     cursor: pointer;
-    text-decoration: none;       
-    border-bottom: none;         
+    text-decoration: none;
+    border-bottom: none;
 }
 
 .participants-tooltip {
@@ -352,7 +360,7 @@
     width: 200px;
     z-index: 1000;
     font-size: 0.9rem;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     text-align: center;
 }
 
@@ -361,29 +369,108 @@
 }
 
 .waitlist-title {
-    color:#76b1c9;
+    color: #76b1c9;
 }
 
+/* ========================================= */
+/* עיצוב פאנל ניהול שיעור (Add User Panel)  */
+/* ========================================= */
 
-/* --- עיצוב פאנל ניהול שיעור) --- */
-
-/* פס עליון צבעוני לפאנל כדי שבלוט */
+/* 1. הקונטיינר הראשי של הפאנל */
 #admin-class-manager {
-    border-top: 5px solid #c8a35f; 
+    border-top: 5px solid #c8a35f;
+    margin-top: 80px !important;
+    margin-bottom: 50px;
+    max-width: 800px !important;
+    padding: 20px !important;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
 }
 
-#admin-class-manager .col-md-8 .form-select {
-    max-width: 400px;
-    justify-content: flex-end;
+/* 2. עיצוב שורת ההוספה */
+/* flex-end: הכפתור יורד למטה כדי להתיישר עם השדה (ולא עם הכותרת שמעליו) */
+#admin-class-manager .d-flex.align-items-end {
+    align-items: flex-end !important;
 }
 
+/* 3. הגדרות לתיבת הבחירה - 100% רוחב כדי למלא את השורה */
+#admin-class-manager .select-wrapper {
+    width: auto !important;
+    flex-grow: 1;
+    max-width: 100%;
+    min-width: 200px;
+}
+
+/* 4. הגדרת גובה אחיד ודק לכפתור ולשדה הבחירה */
+#admin-class-manager .btn-add-user,
+#admin-class-manager .custom-select-trigger {
+    height: 38px !important;
+    /* גובה קבוע דק */
+    padding: 0 15px !important;
+    display: flex;
+    align-items: center;
+    line-height: normal;
+}
+
+/* עיצוב ספציפי לכפתור "הוסף לשיעור" */
+#admin-class-manager .btn-add-user {
+    white-space: nowrap;
+    gap: 8px;
+    margin-bottom: 0;
+}
+
+/* --- דרופדאון חכם (Smart Dropdown) --- */
+
+/* הכפתור שפותח את הרשימה */
+.custom-select-trigger {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: white;
+    cursor: pointer;
+    justify-content: space-between;
+    font-size: 1rem;
+    position: relative;
+}
+
+.custom-select-trigger:hover {
+    border-color: #888;
+    background-color: #f9f9f9;
+}
+
+/* המיכל שנפתח */
+.custom-dropdown-content {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 0 0 5px 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    padding-bottom: 5px;
+}
+
+/* הרשימה עצמה */
+#all-users-select {
+    width: 100%;
+    height: 150px;
+    border: none;
+}
+
+#all-users-select:focus {
+    box-shadow: none;
+}
+
+/* כפתורים וסידור רשימת רשומים */
 #admin-class-manager .col-md-4 .btn {
     max-width: 150px;
     justify-content: flex-start;
 }
 
 /* סידור השורות ברשימה (שם בצד ימין, כפתור מחיקה בצד שמאל) */
-#list-registered .list-group-item, 
+#list-registered .list-group-item,
 #list-waitlist .list-group-item {
     display: flex;
     justify-content: space-between;
@@ -392,12 +479,12 @@
     border: none;
 }
 
-/* עיצוב כפתור המחיקה (X) */
+/* עיצוב כפתור המחיקה (X) ברשימה */
 .btn-remove-user {
-    background-color: #ffe6e6; 
-    color: #c0392b; 
+    background-color: #ffe6e6;
+    color: #c0392b;
     border: none;
-    border-radius: 50%; 
+    border-radius: 50%;
     width: 30px;
     height: 30px;
     line-height: 30px;
@@ -410,9 +497,37 @@
 }
 
 .btn-remove-user:hover {
-    background-color: #e74c3c; 
+    background-color: #e74c3c;
     color: white;
-    transform: scale(1.1); 
+    transform: scale(1.1);
 }
 
+/* ========================================================= */
+/* עיצוב שורת רשימת המתנה (שעון) - מותאם למשתתפים          */
+/* ========================================================= */
+.waitlist-status-row {
+    /* התאמה מלאה ל-.class-details */
+    font-size: 13px;
+    color: #555;
+    font-weight: 400;
+    /* ביטול בולד */
 
+    /* יישור לימין (ב-RTL זה Start) */
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+
+    gap: 6px;
+    margin-top: 4px;
+    /* רווח עדין */
+    margin-bottom: 4px;
+    width: 100%;
+
+    cursor: pointer;
+    position: relative;
+}
+
+.waitlist-status-row i {
+    font-size: 13px;
+    /* גודל האייקון כמו הטקסט */
+}

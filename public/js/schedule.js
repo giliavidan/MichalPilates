@@ -1,7 +1,8 @@
 let currentWeekOffset = 0;
 let fetchedClasses = [];
 let currentManagingClassId = null;
-let maxClassDate = null; // התאריך המאוחר ביותר שיש בו שיעור
+let maxClassDate = null;
+let allUsersGlobal = [];
 
 const role = sessionStorage.getItem('userRole');
 const isAdmin = (role === 'admin');
@@ -12,18 +13,18 @@ function checkUrlForDate() {
 
     if (dateParam) {
         const targetDate = new Date(dateParam);
-        const today      = new Date();
+        const today = new Date();
 
         targetDate.setHours(0, 0, 0, 0);
         today.setHours(0, 0, 0, 0);
 
         const targetSunday = new Date(targetDate);
-        targetSunday.setDate(targetDate.getDate() - targetDate.getDay()); // 0=ראשון
+        targetSunday.setDate(targetDate.getDate() - targetDate.getDay());
 
         const currentSunday = new Date(today);
         currentSunday.setDate(today.getDate() - today.getDay());
 
-        const diffTime  = targetSunday - currentSunday;
+        const diffTime = targetSunday - currentSunday;
         const diffWeeks = Math.round(diffTime / (1000 * 60 * 60 * 24 * 7));
 
         currentWeekOffset = diffWeeks;
@@ -63,13 +64,12 @@ function formatDateForInput(dateData) {
     return `${year}-${month}-${day}`;
 }
 
-// טוען את התאריך המאוחר ביותר שיש עבורו שיעור
 async function loadMaxClassDate() {
     try {
         const res = await fetch('/api/max-class-date');
         const data = await res.json();
         if (data.maxDate) {
-            maxClassDate = data.maxDate; // "YYYY-MM-DD"
+            maxClassDate = data.maxDate;
         } else {
             maxClassDate = null;
         }
@@ -117,7 +117,6 @@ function renderSchedule(classes, notices) {
     const addClassBtn = document.getElementById('btn-add-class-mode');
     if (addClassBtn) addClassBtn.style.display = isAdmin ? 'block' : 'none';
 
-    // כפתור אדמין: יצירת שיעורים לשבוע שמוצג כרגע
     const genNextWeekBtn = document.getElementById('btn-generate-next-week');
     if (genNextWeekBtn) {
         genNextWeekBtn.style.display = isAdmin ? 'block' : 'none';
@@ -129,10 +128,10 @@ function renderSchedule(classes, notices) {
                     today.setHours(0, 0, 0, 0);
                     const baseDate = new Date(today);
                     baseDate.setDate(today.getDate() + (currentWeekOffset * 7));
-                    const dayIndex = baseDate.getDay(); 
+                    const dayIndex = baseDate.getDay();
                     const startOfWeek = new Date(baseDate);
                     startOfWeek.setDate(baseDate.getDate() - dayIndex);
-                    
+
                     const y = startOfWeek.getFullYear();
                     const m = String(startOfWeek.getMonth() + 1).padStart(2, '0');
                     const d = String(startOfWeek.getDate()).padStart(2, '0');
@@ -142,27 +141,27 @@ function renderSchedule(classes, notices) {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            startDate: formattedStartDate 
+                            startDate: formattedStartDate
                         })
                     })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success) {
-                            loadMaxClassDate().then(() => loadData());
-                        } else {
-                            showMessage(data.message || 'שגיאה ביצירת מערכת השעות לשבוע זה');
-                        }
-                    })
-                    .catch(() => {
-                        showMessage('שגיאה ביצירת מערכת השעות לשבוע זה');
-                    });
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                loadMaxClassDate().then(() => loadData());
+                            } else {
+                                showMessage(data.message || 'שגיאה ביצירת מערכת השעות לשבוע זה');
+                            }
+                        })
+                        .catch(() => {
+                            showMessage('שגיאה ביצירת מערכת השעות לשבוע זה');
+                        });
                 }
             );
         };
     }
 
     setWeeklyDates();
-    updateNextWeekButtonVisibility(); // עדכון כפתור שבוע הבא לפי maxClassDate
+    updateNextWeekButtonVisibility();
 
     for (let i = 0; i <= 5; i++) {
         const el = document.getElementById(`day-content-${i}`);
@@ -183,15 +182,15 @@ function renderSchedule(classes, notices) {
         if (!dayContainer) continue;
 
         const columnDayName = dayContainer.getAttribute('data-dayname');
-        
+
         const today = new Date();
-        today.setHours(0,0,0,0);
+        today.setHours(0, 0, 0, 0);
         const base = new Date(today);
         base.setDate(today.getDate() + (currentWeekOffset * 7));
-        const dayIndexView = base.getDay(); 
+        const dayIndexView = base.getDay();
         const startOfWeekView = new Date(base);
         startOfWeekView.setDate(base.getDate() - dayIndexView);
-        
+
         const endOfWeekView = new Date(startOfWeekView);
         endOfWeekView.setDate(startOfWeekView.getDate() + 6);
         endOfWeekView.setHours(23, 59, 59, 999);
@@ -210,9 +209,39 @@ function renderSchedule(classes, notices) {
         relevantClasses.forEach(cls => {
             const isZoom = !!cls.zoom;
             const userStatus = cls.user_status;
-            const currentCount = cls.current_participants || 0;
-            const maxCount = cls.max_participants;
+            const currentCount = parseInt(cls.current_participants || 0);
+            const maxCount = parseInt(cls.max_participants || 0);
             const isFull = currentCount >= maxCount;
+
+            const waitlistCount = cls.waitlist_count || 0;
+            const myPos = cls.waitlist_position || 0;
+
+            // --- בדיקה האם השיעור בעבר ---
+            const now = new Date();
+            const [y, m, d] = cls.class_date.split('-').map(Number);
+            const [h, min] = cls.start_time.split(':').map(Number);
+            const classStart = new Date(y, m - 1, d, h, min);
+            const isPast = classStart < now;
+            // -----------------------------
+
+            let waitlistInfoHtml = '';
+
+            if (waitlistCount > 0) {
+                let displayText = '';
+                if (userStatus === 'waitlist') {
+                    displayText = `${myPos}/${waitlistCount} ברשימת המתנה`;
+                } else {
+                    displayText = `${waitlistCount} ברשימת המתנה`;
+                }
+
+                waitlistInfoHtml = `
+                    <div class="waitlist-status-row participants-tooltip-container" onmouseenter="showWaitlistParticipants(this, ${cls.id})">
+                        <i class="far fa-clock"></i> 
+                        <span>${displayText}</span>
+                        <div class="participants-tooltip">טוען...</div>
+                    </div>
+                `;
+            }
 
             let actionHtml = '';
 
@@ -226,18 +255,31 @@ function renderSchedule(classes, notices) {
                 if (!loggedUserId) {
                     actionHtml = '';
                 } else {
+                    // --- לוגיקת כפתורים חכמה לשיעורי עבר ---
+                    // מגדירים את הפעולות כברירת מחדל
+                    let clickCancel = `cancelRegistration(${cls.id})`;
+                    let clickRegister = `registerForClass(${cls.id}, false)`;
+                    let clickWaitlist = `registerForClass(${cls.id}, true)`;
+
+                    // אם השיעור בעבר - דורסים את הפעולה עם הודעת שגיאה
+                    if (isPast) {
+                        clickCancel = "showMessage('לא ניתן לבטל אימון שהסתיים')";
+                        clickRegister = "showMessage('לא ניתן להירשם לשיעור שהסתיים')";
+                        clickWaitlist = "showMessage('לא ניתן להירשם לשיעור שהסתיים')";
+                    }
+
                     if (userStatus === 'registered') {
-                        actionHtml = `<button class="register-btn registered" onclick="cancelRegistration(${cls.id})">רשום ✓ (ביטול)</button>`;
+                        // כפתור אדום - נשאר, אבל הפעולה משתנה אם זה בעבר
+                        actionHtml = `<button class="register-btn registered" onclick="${clickCancel}">רשום ✓ (ביטול)</button>`;
                     } else if (userStatus === 'waitlist') {
-                        actionHtml = `
-                            <div class="waitlist-info">את/ה במקום ה ${cls.waitlist_position} ברשימת המתנה </div>
-                            <button class="register-btn-waitlist" onclick="cancelRegistration(${cls.id})">ביטול המתנה</button>
-                        `;
+                        // כפתור המתנה - נשאר
+                        actionHtml = `<button class="register-btn-waitlist" onclick="${clickCancel}">ביטול המתנה</button>`;
                     } else {
-                        if (!isZoom && isFull) {
-                            actionHtml = `<button class="register-btn-waitlist" onclick="registerForClass(${cls.id}, true)">הרשמה להמתנה</button>`;
+                        // כפתור הרשמה
+                        if (isFull) {
+                            actionHtml = `<button class="register-btn-waitlist" onclick="${clickWaitlist}">הרשמה להמתנה</button>`;
                         } else {
-                            actionHtml = `<button class="register-btn" onclick="registerForClass(${cls.id}, false)">הרשמה לשיעור</button>`;
+                            actionHtml = `<button class="register-btn" onclick="${clickRegister}">הרשמה לשיעור</button>`;
                         }
                     }
                 }
@@ -277,10 +319,15 @@ function renderSchedule(classes, notices) {
                 <div class="class-time fw-bold" style="direction:ltr;">${timeRange}</div>
                 <div class="class-name">${cls.class_name}</div>
                 <div class="class-instructor small text-muted">${cls.instructor}</div>
-                <div class="class-details mt-1 d-flex justify-content-between align-items-center">
-                    ${countDisplay}
-                    ${zoomHtml}
+                
+                <div class="class-details mt-1 d-flex flex-column justify-content-center align-items-center">
+                    <div class="d-flex justify-content-between w-100 align-items-center">
+                        ${countDisplay}
+                        ${zoomHtml}
+                    </div>
+                    ${waitlistInfoHtml}
                 </div>
+
                 <div class="class-admin-actions-row">
                     ${actionHtml}
                 </div>
@@ -324,17 +371,18 @@ function openClassManager(classId) {
     managerDiv.style.display = 'block';
     managerDiv.scrollIntoView({ behavior: 'smooth' });
 
+    const triggerText = document.getElementById('selected-user-text');
+    if (triggerText) {
+        triggerText.innerText = "-- בחר/י מתאמן להוספה --";
+        triggerText.style.fontWeight = 'normal';
+        triggerText.style.color = 'inherit';
+    }
+
     fetch('/all-users')
         .then(res => res.json())
         .then(users => {
-            const select = document.getElementById('all-users-select');
-            select.innerHTML = '<option value="">-- בחרי מתעמלת להוספה --</option>';
-            users.forEach(u => {
-                const option = document.createElement('option');
-                option.value = u.email;
-                option.innerText = `${u.first_name} ${u.last_name} (${u.email})`;
-                select.appendChild(option);
-            });
+            allUsersGlobal = users;
+            renderUserSelect(users);
         });
 
     loadManagerData(classId);
@@ -378,7 +426,7 @@ function loadManagerData(classId) {
 }
 
 function adminRemoveUser(userEmail, classId) {
-    showConfirm('האם להסיר את המתעמלת מהשיעור?', function () {
+    showConfirm('האם להסיר את המתאמן מהשיעור?', function () {
         fetch('/cancel-registration', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -393,33 +441,6 @@ function adminRemoveUser(userEmail, classId) {
                 }
             });
     });
-}
-
-function adminAddUserToClass() {
-    const select = document.getElementById('all-users-select');
-    const userEmail = select.value;
-
-    if (!userEmail) {
-        showMessage('יש לבחור מתעמלת מהרשימה');
-        return;
-    }
-    if (!currentManagingClassId) return;
-
-    fetch('/admin-add-user', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: userEmail, classId: currentManagingClassId })
-    })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                showMessage('הוספה בוצעה בהצלחה');
-                loadData();
-                select.value = "";
-            } else {
-                showMessage(data.message);
-            }
-        });
 }
 
 // ===================== לוגיקת משתמש רגיל =====================
@@ -531,18 +552,43 @@ function showParticipants(element, classId) {
         });
 }
 
+// --- פונקציה חדשה: מציגה את רשימת הממתינים ב-Tooltip ---
+function showWaitlistParticipants(element, classId) {
+    const tooltip = element.querySelector('.participants-tooltip');
+    if (tooltip.dataset.loaded === "true") return;
+
+    fetch(`/class-participants/${classId}`)
+        .then(res => res.json())
+        .then(users => {
+            // מסננים רק את מי שב-waitlist
+            const waitlistOnly = users.filter(u => u.status === 'waitlist');
+
+            if (waitlistOnly.length === 0) {
+                tooltip.innerHTML = "רשימת המתנה ריקה";
+            } else {
+                // מציגים רשימה ממוספרת לפי הסדר
+                const names = waitlistOnly.map((u, index) => `<div>${index + 1}. ${u.first_name} ${u.last_name}</div>`).join('');
+                tooltip.innerHTML = names;
+            }
+            tooltip.dataset.loaded = "true";
+        })
+        .catch(() => {
+            tooltip.innerHTML = "שגיאה בטעינה";
+        });
+}
+
 // ========= חישוב שבוע וציון שם היום לכל עמודה =========
 
 function setWeeklyDates() {
     const today = new Date();
-    today.setHours(0,0,0,0);
+    today.setHours(0, 0, 0, 0);
 
     const currentViewDate = new Date(today);
     currentViewDate.setDate(today.getDate() + (currentWeekOffset * 7));
 
-    const dayIndex = currentViewDate.getDay(); // 0..6
+    const dayIndex = currentViewDate.getDay();
     const startOfWeek = new Date(currentViewDate);
-    startOfWeek.setDate(currentViewDate.getDate() - dayIndex); // לזוז אחורה ליום ראשון
+    startOfWeek.setDate(currentViewDate.getDate() - dayIndex);
 
     const daysNames = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי'];
 
@@ -556,12 +602,11 @@ function setWeeklyDates() {
         const dayContent = document.getElementById(`day-content-${i}`);
         if (dayContent) {
             dayContent.setAttribute('data-date', formattedDate);
-            dayContent.setAttribute('data-dayname', daysNames[i]); // שם יום לעמודה
+            dayContent.setAttribute('data-dayname', daysNames[i]);
         }
     }
 }
 
-// חסימת דפדוף קדימה לפי האם יש שיעורים מוגדרים קדימה
 function changeWeek(direction) {
     if (!isAdmin && direction > 0 && maxClassDate) {
         const today = new Date();
@@ -580,24 +625,20 @@ function changeWeek(direction) {
     loadData();
 }
 
-// כפתור "שבוע נוכחי"
 function goToCurrentWeek() {
     currentWeekOffset = 0;
     loadData();
 }
 
-// עדכון האם להראות את כפתור "שבוע הבא" למשתמש רגיל
 function updateNextWeekButtonVisibility() {
     const nextBtn = document.getElementById('btn-next-week');
     if (!nextBtn) return;
 
-    // אדמין תמיד רואה את הכפתור
     if (isAdmin) {
         nextBtn.style.display = 'inline-block';
         return;
     }
 
-    // אם אין בכלל שיעורים – אין כפתור
     if (!maxClassDate) {
         nextBtn.style.display = 'none';
         return;
@@ -606,11 +647,10 @@ function updateNextWeekButtonVisibility() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // חישוב תחילת וסוף השבוע שמוצג כרגע
     const currentViewDate = new Date(today);
     currentViewDate.setDate(today.getDate() + (currentWeekOffset * 7));
 
-    const dayIndex = currentViewDate.getDay(); // 0=ראשון
+    const dayIndex = currentViewDate.getDay();
     const startOfWeek = new Date(currentViewDate);
     startOfWeek.setDate(currentViewDate.getDate() - dayIndex);
 
@@ -619,7 +659,6 @@ function updateNextWeekButtonVisibility() {
 
     const endOfWeekStr = formatDateForInput(endOfWeek);
 
-    // אם השיעור האחרון (maxClassDate) נמצא בתוך השבוע הזה או לפניו – אין יותר שבועות עם שיעורים => להסתיר
     if (endOfWeekStr >= maxClassDate) {
         nextBtn.style.display = 'none';
     } else {
@@ -632,8 +671,8 @@ function updateNextWeekButtonVisibility() {
 function openModal(classId = null) {
     const modalElement = document.getElementById('classModal');
     const modalTitle = document.getElementById('modalTitle');
-    const dateInput  = document.getElementById('classDate');
-    const daySelect  = document.getElementById('classDay');
+    const dateInput = document.getElementById('classDate');
+    const daySelect = document.getElementById('classDay');
     document.getElementById('formClass').reset();
 
     if (classId) {
@@ -706,7 +745,7 @@ function submitClassForm() {
 }
 
 function deleteClass(id) {
-    showConfirm('למחוק?', function () {
+    showConfirm('האם למחוק את השיעור הזה?', function () {
         fetch(`/delete-class/${id}`, { method: 'DELETE' }).then(res => res.json()).then(data => {
             if (data.success) loadData(); else showMessage('שגיאה');
         });
@@ -727,7 +766,125 @@ function addNewNotice() {
 }
 
 function deleteMessage(id) {
-    showConfirm('למחוק?', function () {
+    showConfirm('האם למחוק את ההודעה מהלוח?', function () {
         fetch(`/delete-message/${id}`, { method: 'DELETE' }).then(() => loadData());
     });
 }
+
+function toggleUserDropdown() {
+    const container = document.getElementById('custom-dropdown-container');
+    const input = document.getElementById('user-search-input');
+
+    if (container.style.display === 'none') {
+        container.style.display = 'block';
+        input.focus();
+        input.value = '';
+        filterUsersList();
+    } else {
+        container.style.display = 'none';
+    }
+}
+
+function selectUserFromList() {
+    const select = document.getElementById('all-users-select');
+    const triggerText = document.getElementById('selected-user-text');
+    const container = document.getElementById('custom-dropdown-container');
+
+    const selectedOption = select.options[select.selectedIndex];
+
+    if (selectedOption && selectedOption.value) {
+        triggerText.innerText = selectedOption.innerText;
+        triggerText.style.fontWeight = 'bold';
+        triggerText.style.color = '#000';
+        container.style.display = 'none';
+    }
+}
+
+// הוספנו פרמטר אופציונלי forceWaitlist
+function adminAddUserToClass(forceWaitlist = false) {
+    const select = document.getElementById('all-users-select');
+    const userEmail = select.value;
+
+    if (!userEmail) {
+        showMessage('יש לבחור מתאמן מהרשימה');
+        return;
+    }
+    if (!currentManagingClassId) return;
+
+    fetch('/admin-add-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            userId: userEmail,
+            classId: currentManagingClassId,
+            asWaitlist: forceWaitlist // שולחים לשרת אם זה להמתנה
+        })
+    })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                showMessage(data.message);
+                loadData();
+
+                // איפוס ה-Dropdown
+                select.value = "";
+                const triggerText = document.getElementById('selected-user-text');
+                if (triggerText) {
+                    triggerText.innerText = "-- בחר/י מתאמן להוספה --";
+                    triggerText.style.fontWeight = 'normal';
+                }
+
+            } else {
+                // --- כאן השינוי: זיהוי אם השיעור מלא ---
+                if (data.code === 'CLASS_FULL') {
+                    showConfirm(data.message, function () {
+                        // אם המנהלת לחצה "אישור" -> מנסים שוב, הפעם להמתנה
+                        adminAddUserToClass(true);
+                    });
+                } else {
+                    showMessage(data.message);
+                }
+            }
+        });
+}
+
+function renderUserSelect(usersList) {
+    const select = document.getElementById('all-users-select');
+    select.innerHTML = '';
+
+    if (usersList.length === 0) {
+        const option = document.createElement('option');
+        option.text = "לא נמצאו תוצאות";
+        select.add(option);
+        return;
+    }
+
+    usersList.forEach(u => {
+        const option = document.createElement('option');
+        option.value = u.email;
+        option.innerText = `${u.first_name} ${u.last_name} (${u.phone || u.email})`;
+        select.appendChild(option);
+    });
+}
+
+function filterUsersList() {
+    const input = document.getElementById('user-search-input');
+    const filter = input.value.toLowerCase();
+
+    const filteredUsers = allUsersGlobal.filter(u => {
+        const fullName = (u.first_name + ' ' + u.last_name).toLowerCase();
+        const phone = (u.phone || '').toLowerCase();
+        return fullName.includes(filter) || phone.includes(filter);
+    });
+
+    renderUserSelect(filteredUsers);
+}
+
+document.addEventListener('click', function (event) {
+    const wrapper = document.querySelector('.select-wrapper');
+    const container = document.getElementById('custom-dropdown-container');
+
+    if (wrapper && container && container.style.display === 'block' && !wrapper.contains(event.target)) {
+        container.style.display = 'none';
+    }
+});

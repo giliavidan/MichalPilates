@@ -19,12 +19,12 @@ body.page-loaded {
     --lightblue0: #cce3de;
     --lightblue1: #bbdefb;
     --lightblue2: #90caf9;
-    --darkblue:#1e2952;
+    --darkblue: #1e2952;
     --logo: #968069;
     --button: #A69079;
     --lightlogo: #F9F8F6;
-    --lightOliveGreen:#b5c99a;
-    --darkerOliveGreen:#97a97c;
+    --lightOliveGreen: #b5c99a;
+    --darkerOliveGreen: #97a97c;
     --chocolate: #583101;
 }
 
@@ -101,18 +101,21 @@ body {
 /* Global popup messages (modal) - לכל ההודעות הקופצות      */
 /* ========================================================= */
 
-.global-message-overlay { /*השכבה שמכסה את המסך*/
+.global-message-overlay {
+    /*השכבה שמכסה את המסך*/
     position: fixed;
     inset: 0;
-    background-color: rgba(0, 0, 0, 0.25); /*נותן רקע שחור שקוף מעל כל המסך שעושה אפקט “כיבוי” לרקע*/
+    background-color: rgba(0, 0, 0, 0.25);
+    /*נותן רקע שחור שקוף מעל כל המסך שעושה אפקט “כיבוי” לרקע*/
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 9999; /*מבטיח שההודעה תהיה מעל כל שאר האלמנטים והנבבר*/
+    z-index: 9999;
+    /*מבטיח שההודעה תהיה מעל כל שאר האלמנטים והנבבר*/
 }
 
 /*איך מסתירים את ההודעה+הרקע*/
-.global-message-overlay.msg-hidden { /* Selector targets the same element when it has both class "global-message-overlay" and class "msg-hidden"*/
+.global-message-overlay.msg-hidden {
     display: none;
 }
 
@@ -126,15 +129,32 @@ body {
     box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
     text-align: center;
 }
+
 /*הטקסט של ההודעה הקופצת*/
 .global-message-box p {
     margin: 0 0 18px;
-    color: var(--lightblack);        
+    color: var(--lightblack);
     font-size: 16px;
     line-height: 1.5;
 }
 
-/*כפתור האישור בחלון ההודעה */
-.global-message-box .global-message-ok {
-    min-width: 120px; /*כאן רק מגדירים לו רוחב מינימלי את הצבעים לוקח מהלחצן הגלובלי*/
+/* --- עיצוב הכפתורים (אישור וביטול) --- */
+
+/* המיכל של הכפתורים - מסדר אותם בשורה */
+.global-message-buttons {
+    display: flex;
+    /* הופך את הסדר: האלמנט הראשון (ביטול) ילך שמאלה, השני (אישור) ילך ימינה */
+    flex-direction: row-reverse;
+    gap: 15px;
+    /* רווח ביניהם */
+    justify-content: center;
+    margin-top: 24px;
+}
+
+/* עיצוב אחיד לשני הכפתורים */
+.global-message-buttons .btn {
+    flex: 1;
+    /* נותן לשניהם רוחב שווה */
+    min-width: 100px;
+    max-width: 150px;
 }

@@ -117,9 +117,9 @@ function updateSingleAuthButton() {
 
 /* -------- Global popup message helper (used instead of alert) -------- */
 function showMessage(text) {
-    const overlay   = document.getElementById('global-message-overlay');
-    const msgText   = document.getElementById('global-message-text');
-    const okBtn     = document.getElementById('global-message-ok');
+    const overlay = document.getElementById('global-message-overlay');
+    const msgText = document.getElementById('global-message-text');
+    const okBtn = document.getElementById('global-message-ok');
     const cancelBtn = document.getElementById('global-message-cancel');
 
     if (!overlay || !msgText || !okBtn) return;
@@ -138,9 +138,9 @@ function showMessage(text) {
 
 // פונקציית אישור/ביטול עם אותו popup גלובלי
 function showConfirm(text, onConfirm, onCancel) {
-    const overlay   = document.getElementById('global-message-overlay');
-    const msgText   = document.getElementById('global-message-text');
-    const okBtn     = document.getElementById('global-message-ok');
+    const overlay = document.getElementById('global-message-overlay');
+    const msgText = document.getElementById('global-message-text');
+    const okBtn = document.getElementById('global-message-ok');
     const cancelBtn = document.getElementById('global-message-cancel');
 
     if (!overlay || !msgText || !okBtn || !cancelBtn) return;
@@ -166,6 +166,6 @@ function showConfirm(text, onConfirm, onCancel) {
 }
 
 // לחשוף את הפונקציות כך שקבצים אחרים יוכלו להשתמש בהן
-window.showMessage  = showMessage;
-window.showConfirm  = showConfirm;
+window.showMessage = showMessage;
+window.showConfirm = showConfirm;
 window.restoreSessionIfNeeded = restoreSessionIfNeeded;
