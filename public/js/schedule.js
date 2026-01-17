@@ -263,7 +263,7 @@ function renderSchedule(classes, notices) {
 
                     // אם השיעור בעבר - דורסים את הפעולה עם הודעת שגיאה
                     if (isPast) {
-                        clickCancel = "showMessage('לא ניתן לבטל אימון שהסתיים')";
+                        clickCancel = "showMessage('לא ניתן לבטל שיעור שהסתיים')";
                         clickRegister = "showMessage('לא ניתן להירשם לשיעור שהסתיים')";
                         clickWaitlist = "showMessage('לא ניתן להירשם לשיעור שהסתיים')";
                     }

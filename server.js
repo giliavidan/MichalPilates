@@ -1,25 +1,17 @@
 const express = require('express');
-const mysql = require('mysql2');
 const path = require('path');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 
 const app = express();
 const port = 3000;
+const db = require('./db');
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-// --- חיבור למסד הנתונים ---
-const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'gnGroup3',
-  database: 'michal_pilates',
-  dateStrings: true
-});
 
 // ===== לוגיקת יצירת שיעורים מטבלת התבניות =====
 const dayNames = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי'];
@@ -90,14 +82,6 @@ function generateNextWeekClasses(callback) {
   const startStr = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-${String(start.getDate()).padStart(2, '0')}`;
   generateClassesForWeek(startStr, callback);
 }
-
-db.connect((err) => {
-  if (err) {
-    console.error('Error connecting to MySQL:', err);
-  } else {
-    console.log('Connected to MySQL Database!');
-  }
-});
 
 // ==========================================
 //           ניהול משתמשים (Auth)
