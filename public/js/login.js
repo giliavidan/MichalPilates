@@ -1,17 +1,17 @@
+// מאזין לטעינת הדף במלואו לפני הרצת הסקריפט
 document.addEventListener('DOMContentLoaded', function () {
 
     const loginForm = document.getElementById('loginForm');
-
-    // מוודאים שהטופס קיים לפני שמוסיפים לו מאזין
     if (loginForm) {
+        // האזנה לאירוע של שליחת הטופס (לחיצה על כפתור התחברות)
         loginForm.addEventListener('submit', function (e) {
-            e.preventDefault(); // מונע רענון של הדף
+            
+            e.preventDefault();
 
-            // 1. לוקחים את הערכים שהמשתמש הזין
             const inputEmail = document.getElementById('email').value;
             const inputPassword = document.getElementById('password').value;
 
-            // 2. שולחים בקשה לשרת
+            // שליחת בקשת התחברות לשרת עם הנתונים בפורמט 
             fetch('/login', {
                 method: 'POST',
                 headers: {
@@ -22,34 +22,34 @@ document.addEventListener('DOMContentLoaded', function () {
                     password: inputPassword
                 })
             })
+             
                 .then(response => response.json())
                 .then(data => {
-                    // 3. השרת החזיר תשובה. נבדוק אם ההתחברות הצליחה
+                    // בדיקה האם ההתחברות הצליחה ושמירת הפרטים
                     if (data.success) {
-
-                        // שמירת פרטי המשתמש ב-SessionStorage (נשמר כל עוד הדפדפן פתוח)
-                        sessionStorage.setItem('userId', data.user.id); // זה המזהה שאיתו נרשמים לשיעורים (האימייל)
+                        sessionStorage.setItem('userId', data.user.id);
                         sessionStorage.setItem('userFirstName', data.user.firstName);
                         sessionStorage.setItem('userRole', data.user.role);
                         sessionStorage.setItem('isLoggedIn', 'true');
 
-                        // שמירת סוג המנוי ב-LocalStorage (כדי שמגבלות הרישום יעבדו גם אם סוגרים את הדפדפן וחוזרים)
+                        // בדיקה אם קיים סוג מנוי למשתמש ושמירתו בזיכרון הקבוע
                         if (data.user.membershipType) {
                             localStorage.setItem('userMembershipType', data.user.membershipType);
                         }
 
-                        // הודעת הצלחה דרך ה‑popup המעוצב
+                        // הצגת הודעת הצלחה למשתמש
                         showMessage('היי ' + data.user.firstName + ', התחברת בהצלחה!');
 
-                        // הפניה לדף הבית אחרי זמן קצר (כדי שיספיקו לראות את ההודעה)
+                        // מעבר לדף הבית 
                         setTimeout(() => {
                             window.location.href = "index.html";
                         }, 1200);
                     } else {
-                        // סיסמה / אימייל לא נכונים – הודעה גלובלית
+                        // הצגת הודעת שגיאה אם הסיסמה או האימייל לא נכונים
                         showMessage(data.message || 'שם משתמש או סיסמה שגויים.');
                     }
                 })
+                // טיפול במקרה של שגיאת תקשורת עם השרת
                 .catch(error => {
                     console.error('Error:', error);
                     showMessage('שגיאת תקשורת עם השרת');

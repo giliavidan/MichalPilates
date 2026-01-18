@@ -1,11 +1,12 @@
+// מאזין לטעינת הדף ומתחיל את הפעולות רק כשהדף מוכן
 document.addEventListener("DOMContentLoaded", function () {
 
-    // הגדרת משתנים לטעינת התפריט והפוטר
+    // הגדרת משתנים למציאת המיקום של התפריט והפוטר בדף
     const navbarPlaceholder = document.getElementById("navbar-placeholder");
     const footerPlaceholder = document.getElementById("footer-placeholder");
     const loadPromises = [];
 
-    // --- 1. טעינת ה-Navbar ---
+    // NAVBAR טעינת
     if (navbarPlaceholder) {
         const navPromise = fetch("navbar.html")
             .then(response => response.text())
@@ -16,7 +17,7 @@ document.addEventListener("DOMContentLoaded", function () {
         loadPromises.push(navPromise);
     }
 
-    // --- 2. טעינת ה-Footer ---
+    // Footer טעינת
     if (footerPlaceholder) {
         const footerPromise = fetch("footer.html")
             .then(response => response.text())
@@ -27,14 +28,11 @@ document.addEventListener("DOMContentLoaded", function () {
         loadPromises.push(footerPromise);
     }
 
-    // --- 3. סיום הטעינה ---
     Promise.all(loadPromises).then(() => {
-
-        // --- השינוי הגדול: בדיקת חיבור לפני עדכון הכפתור ---
+        // בודק מול השרת אם המשתמש כבר מחובר (למשל אם רענן את הדף)
         restoreSessionIfNeeded();
-        // ---------------------------------------------------
 
-        // גלילה לאלמנט ספציפי אם יש בכתובת #
+        // גלילה לאלמנט ספציפי אם יש בכתובת # (קישור עוגן)
         if (window.location.hash) {
             setTimeout(() => {
                 const element = document.querySelector(window.location.hash);
@@ -47,15 +45,15 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 
-/**
- * פונקציה חדשה: משחזרת את החיבור מהשרת אם צריך
- */
+
+// פונקציה שבודקת אם המשתמש מחובר בשרת אך לא בדפדפן
 async function restoreSessionIfNeeded() {
     if (!sessionStorage.getItem("isLoggedIn")) {
         try {
             const res = await fetch('/api/check-session');
             const data = await res.json();
 
+            // אם השרת אומר שהמשתמש מחובר, שומרים את הפרטים מחדש בדפדפן
             if (data.isLoggedIn) {
                 sessionStorage.setItem('userId', data.user.id);
                 sessionStorage.setItem('userFirstName', data.user.firstName);
@@ -67,16 +65,16 @@ async function restoreSessionIfNeeded() {
                 }
             }
         } catch (e) {
+            // מדפיס הודעה אם לא נמצא חיבור לשחזור
             console.log("No session to restore");
         }
     }
 
+    // מעדכן את כפתור ההתחברות/התנתקות לפי המצב החדש
     updateSingleAuthButton();
 }
 
-/**
- * פונקציה שמטפלת בכפתור האחד והיחיד: authBtn
- */
+// פונקציה המנהלת את התצוגה והפעולה של כפתור ההתחברות בתפריט
 function updateSingleAuthButton() {
     const authBtn = document.getElementById('authBtn');
     if (!authBtn) return;
@@ -84,18 +82,20 @@ function updateSingleAuthButton() {
     const isLoggedIn = sessionStorage.getItem('isLoggedIn');
     const firstName = sessionStorage.getItem('userFirstName');
 
-    // === מצב מחובר ===
+    // מצב מחובר 
     if (isLoggedIn === 'true') {
         authBtn.textContent = 'שלום, ' + firstName;
         authBtn.href = "#";
 
+        // הגדרת פעולה בעת לחיצה על הכפתור כשהמשתמש מחובר
         authBtn.onclick = function (event) {
             event.preventDefault();
 
-            // כאן במקום confirm משתמשים ב-popup הגלובלי
             showConfirm('האם את/ה רוצה להתנתק ?', function () {
+                // שליחת בקשת התנתקות לשרת
                 fetch('/logout')
                     .then(() => {
+                        // מחיקת פרטי המשתמש מהזיכרון והעברה לדף הבית
                         sessionStorage.clear();
                         localStorage.removeItem('userMembershipType');
                         window.location.href = "index.html";
@@ -103,19 +103,21 @@ function updateSingleAuthButton() {
             });
         };
 
-        // === מצב אורח ===
+        //  מצב אורח 
+        // אם המשתמש לא מחובר, הכפתור מוביל לדף ההתחברות
     } else {
         authBtn.textContent = 'הרשמה / התחברות';
         authBtn.href = "login.html";
         authBtn.onclick = null;
     }
 
+    // מסתיר את כפתור ההתחברות אם המשתמש בדף ההתחברות
     if (document.body.id === 'page_login') {
         authBtn.style.display = 'none';
     }
 }
 
-/* -------- Global popup message helper (used instead of alert) -------- */
+// פונקציה להצגת הודעה מעוצבת על המסך (במקום הודעת מערכת רגילה)
 function showMessage(text) {
     const overlay = document.getElementById('global-message-overlay');
     const msgText = document.getElementById('global-message-text');
@@ -124,19 +126,18 @@ function showMessage(text) {
 
     if (!overlay || !msgText || !okBtn) return;
 
+    // עדכון הטקסט של ההודעה
     msgText.textContent = text;
-
-    // הודעה רגילה – לא צריך כפתור ביטול
     if (cancelBtn) cancelBtn.style.display = 'none';
-
     overlay.classList.remove('msg-hidden');
 
+    // סגירת החלונית בלחיצה על אישור
     okBtn.onclick = function () {
         overlay.classList.add('msg-hidden');
     };
 }
 
-// פונקציית אישור/ביטול עם אותו popup גלובלי
+// פונקציה להצגת הודעה שדורשת אישור או ביטול מהמשתמש
 function showConfirm(text, onConfirm, onCancel) {
     const overlay = document.getElementById('global-message-overlay');
     const msgText = document.getElementById('global-message-text');
@@ -146,10 +147,12 @@ function showConfirm(text, onConfirm, onCancel) {
     if (!overlay || !msgText || !okBtn || !cancelBtn) return;
 
     msgText.textContent = text;
+    // מציג את כפתור הביטול כי זו הודעת אישור
     cancelBtn.style.display = 'inline-block';
 
     overlay.classList.remove('msg-hidden');
 
+    // מריץ את פונקציית האישור אם המשתמש לחץ "אישור"
     okBtn.onclick = function () {
         overlay.classList.add('msg-hidden');
         if (typeof onConfirm === 'function') {
@@ -157,6 +160,7 @@ function showConfirm(text, onConfirm, onCancel) {
         }
     };
 
+    // מריץ את פונקציית הביטול אם המשתמש לחץ "ביטול"
     cancelBtn.onclick = function () {
         overlay.classList.add('msg-hidden');
         if (typeof onCancel === 'function') {
@@ -165,7 +169,7 @@ function showConfirm(text, onConfirm, onCancel) {
     };
 }
 
-// לחשוף את הפונקציות כך שקבצים אחרים יוכלו להשתמש בהן
+// הופך את הפונקציות לזמינות בכל מקום באפליקציה (גלובליות)
 window.showMessage = showMessage;
 window.showConfirm = showConfirm;
 window.restoreSessionIfNeeded = restoreSessionIfNeeded;

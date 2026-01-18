@@ -1,9 +1,8 @@
-/* Smooth Scrolling */
 html {
     scroll-behavior: smooth;
 }
 
-/* Main page layout */
+/* הגדרות ראשיות של העמוד */
 .main {
     margin: 0;
     padding: 0;
@@ -12,18 +11,19 @@ html {
     text-align: center;
 }
 
-/* Opening image */
+/* תמונה ראשית */
 .full-width-img {
     width: 100%;
     height: auto;
     display: block;
 }
 
+/* ביטול המרווח התחתון באודות */
 .about .headers {
     margin-bottom: 0;
-    /* במקום מרווח ברירת מחדל גדול יותר */
 }
 
+/* טקסט התיאור */
 #description {
     margin: 0 auto;
     max-width: 800px;
@@ -32,7 +32,7 @@ html {
     margin-bottom: 17px;
 }
 
-/* Classes section Container */
+/* כרטיסיות השיעורים */
 .typeOfClasses {
     display: flex;
     margin-bottom: 0;
@@ -45,7 +45,7 @@ html {
     box-sizing: border-box;
 }
 
-/* Individual Class Card Wrapper */
+/* כרטיסייה בודדת */
 .typeOfClasses>div {
     flex-basis: 20em;
     flex-shrink: 1;
@@ -56,7 +56,7 @@ html {
     margin: 0;
 }
 
-/* Picture of the Class */
+/* תמונת השיעור בכרטיסייה */
 .typeOfClasses .card-img-top {
     width: 100%;
     height: 230px;
@@ -64,7 +64,7 @@ html {
     object-fit: cover;
 }
 
-/* The title of the Class */
+/* כותרת שם השיעור בתוך הכרטיסייה */
 .typeOfClasses .card-text {
     text-align: center;
     color: var(--logo);
@@ -79,7 +79,7 @@ html {
     background-color: var(--lightbeigh0);
 }
 
-/* Makes the entire Class area clickable */
+/* הופך את כל אזור הכרטיסייה ללחיץ */
 .typeOfClasses a {
     text-decoration: none;
     color: inherit;
@@ -87,7 +87,7 @@ html {
     cursor: pointer;
 }
 
-/* The open text details */
+/* אזור הפירוט שנפתח */
 .typeOfClasses .class-details {
     border: none !important;
     background-color: var(--lightbeigh0) !important;
@@ -98,30 +98,31 @@ html {
     border-radius: 0 0 4px 4px;
 }
 
-/* Cancel default margins */
 .typeOfClasses .card {
     margin: 0;
 }
 
-/* Contact section */
+/* אזור יצירת הקשר */
 .contact {
     background-color: var(--darkgray);
     color: var(--lightbeigh0);
     padding: 20px 10px;
 }
 
+/*  הכותרת באזור יצירת הקשר */
 .contact h3 {
     margin-bottom: 10px;
     font-size: 28px;
 }
 
+/* הטקסט הרגיל באזור יצירת הקשר */
 .contact p {
     margin: 0;
     line-height: 1.7;
     font-size: 1.2rem;
 }
 
-/* Email Link */
+/* קישור האימייל */
 .contact a {
     color: inherit;
     text-decoration: none;
@@ -133,11 +134,12 @@ html {
     text-decoration: underline;
 }
 
-/* Animation trigger */
+/* הפעלת אנימציית כניסה בטעינת הדף לכל הגוף */
 body {
     animation: fadeInAnimation 0.8s ease-out;
 }
 
+/* הגדרת שלבי האנימציה */
 @keyframes fadeInAnimation {
     from {
         opacity: 0;

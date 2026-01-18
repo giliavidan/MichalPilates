@@ -1,3 +1,4 @@
+// משתנים גלובליים לניהול מצב התצוגה 
 let currentWeekOffset = 0;
 let fetchedClasses = [];
 let currentManagingClassId = null;
@@ -7,6 +8,7 @@ let allUsersGlobal = [];
 const role = sessionStorage.getItem('userRole');
 const isAdmin = (role === 'admin');
 
+// בודק אם הכתובת מכילה תאריך ספציפי ומכוון את התצוגה לשבוע הרלוונטי
 function checkUrlForDate() {
     const urlParams = new URLSearchParams(window.location.search);
     const dateParam = urlParams.get('date');
@@ -33,6 +35,7 @@ function checkUrlForDate() {
 
 checkUrlForDate();
 
+// מאזין לטעינת הדף: טוען נתונים ראשוניים ומגדיר אירועים לכפתורים
 document.addEventListener('DOMContentLoaded', function () {
     loadMaxClassDate().then(() => {
         loadData();
@@ -54,6 +57,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
+// פונקציית עזר לפרמוט תאריך עבור שדות קלט (type="date")
 function formatDateForInput(dateData) {
     if (!dateData) return new Date().toISOString().split('T')[0];
     if (typeof dateData === 'string' && dateData.length === 10 && !dateData.includes('T')) return dateData;
@@ -64,6 +68,7 @@ function formatDateForInput(dateData) {
     return `${year}-${month}-${day}`;
 }
 
+// טוען מהשרת את התאריך הכי רחוק שיש בו שיעורים (כדי למנוע דפדוף אינסופי)
 async function loadMaxClassDate() {
     try {
         const res = await fetch('/api/max-class-date');
@@ -78,6 +83,7 @@ async function loadMaxClassDate() {
     }
 }
 
+// טוען את כל השיעורים וההודעות מהשרת במקביל ומרענן את התצוגה
 function loadData() {
     const uId = sessionStorage.getItem('userId') || 0;
     Promise.all([
@@ -93,6 +99,7 @@ function loadData() {
     }).catch(err => console.error("Error loading data:", err));
 }
 
+// פונקציה שמציגה את מערכת השעות בעמוד בהתאם לשיעורים והודעות
 function renderSchedule(classes, notices) {
     const noticesContainer = document.getElementById('notices-container');
     if (noticesContainer) {
@@ -117,6 +124,7 @@ function renderSchedule(classes, notices) {
     const addClassBtn = document.getElementById('btn-add-class-mode');
     if (addClassBtn) addClassBtn.style.display = isAdmin ? 'block' : 'none';
 
+    // לוגיקה לכפתור "צור שבוע הבא" למנהלים
     const genNextWeekBtn = document.getElementById('btn-generate-next-week');
     if (genNextWeekBtn) {
         genNextWeekBtn.style.display = isAdmin ? 'block' : 'none';
@@ -163,6 +171,7 @@ function renderSchedule(classes, notices) {
     setWeeklyDates();
     updateNextWeekButtonVisibility();
 
+    // ניקוי התוכן הקיים בעמודות הימים
     for (let i = 0; i <= 5; i++) {
         const el = document.getElementById(`day-content-${i}`);
         if (el) {
@@ -177,6 +186,7 @@ function renderSchedule(classes, notices) {
         membershipType === 'gym_2perweek' ||
         membershipType === 'zoom';
 
+    // לולאה ראשית למילוי השיעורים בכל יום
     for (let i = 0; i <= 5; i++) {
         const dayContainer = document.getElementById(`day-content-${i}`);
         if (!dayContainer) continue;
@@ -195,6 +205,7 @@ function renderSchedule(classes, notices) {
         endOfWeekView.setDate(startOfWeekView.getDate() + 6);
         endOfWeekView.setHours(23, 59, 59, 999);
 
+        // סינון השיעורים ששייכים ליום ולשבוע הנוכחי
         const relevantClasses = classes
             .filter(c => {
                 const cDate = new Date(c.class_date);
@@ -216,16 +227,16 @@ function renderSchedule(classes, notices) {
             const waitlistCount = cls.waitlist_count || 0;
             const myPos = cls.waitlist_position || 0;
 
-            // --- בדיקה האם השיעור בעבר ---
+            //בדיקה האם השיעור בעבר 
             const now = new Date();
             const [y, m, d] = cls.class_date.split('-').map(Number);
             const [h, min] = cls.start_time.split(':').map(Number);
             const classStart = new Date(y, m - 1, d, h, min);
             const isPast = classStart < now;
-            // -----------------------------
 
             let waitlistInfoHtml = '';
 
+            // הצגת מידע על רשימת המתנה אם יש ממתינים
             if (waitlistCount > 0) {
                 let displayText = '';
                 if (userStatus === 'waitlist') {
@@ -245,6 +256,7 @@ function renderSchedule(classes, notices) {
 
             let actionHtml = '';
 
+            // הגדרת הכפתורים (הרשמה/ביטול/עריכה) לפי סוג משתמש ומצב שיעור
             if (isAdmin) {
                 actionHtml = `
                     <div class="admin-actions">
@@ -255,7 +267,7 @@ function renderSchedule(classes, notices) {
                 if (!loggedUserId) {
                     actionHtml = '';
                 } else {
-                    // --- לוגיקת כפתורים חכמה לשיעורי עבר ---
+                    // --- לוגיקת כפתורים לשיעורי עבר ---
                     // מגדירים את הפעולות כברירת מחדל
                     let clickCancel = `cancelRegistration(${cls.id})`;
                     let clickRegister = `registerForClass(${cls.id}, false)`;
@@ -285,7 +297,8 @@ function renderSchedule(classes, notices) {
                 }
             }
 
-            let zoomHtml = '';
+           let zoomHtml = '';
+            // בדיקה האם להציג קישור זום
             if (isZoom && loggedUserId && (canSeeZoomLink || isAdmin)) {
                 zoomHtml = `
                     <a href="https://us02web.zoom.us/j/3430100607"
@@ -296,6 +309,7 @@ function renderSchedule(classes, notices) {
                     </a>`;
             }
 
+            // יצירת התצוגה של כמות המשתתפים
             const countDisplay = `
                 <span class="participants-tooltip-container" onmouseenter="showParticipants(this, ${cls.id})">
                     <i class="fas fa-users"></i> ${currentCount}/${maxCount}
@@ -303,9 +317,11 @@ function renderSchedule(classes, notices) {
                 </span>
             `;
 
+            // יצירת האלמנט הראשי שיכיל את כרטיסיית השיעור
             const card = document.createElement('div');
             card.className = 'class-card';
 
+            // למנהל: הוספת אפקט ריחוף ולחיצה לפתיחת ניהול השיעור
             if (isAdmin) {
                 card.classList.add('admin-hover');
                 card.style.cursor = 'pointer';
@@ -313,8 +329,10 @@ function renderSchedule(classes, notices) {
                 card.setAttribute('title', 'לחצי לפתיחת ניהול משתתפים');
             }
 
+            // יצירת מחרוזת השעות (התחלה וסיום) בפורמט קצר 
             const timeRange = `${cls.start_time.substring(0, 5)} - ${cls.end_time.substring(0, 5)}`;
 
+            // מילוי תוכן הכרטיסייה
             card.innerHTML = `
                 <div class="class-time fw-bold" style="direction:ltr;">${timeRange}</div>
                 <div class="class-name">${cls.class_name}</div>
@@ -332,13 +350,15 @@ function renderSchedule(classes, notices) {
                     ${actionHtml}
                 </div>
             `;
+            // הוספת הכרטיסייה בלוח השנה
             dayContainer.appendChild(card);
         });
     }
 }
 
-// ===================== Admin manager =====================
+// מנהל
 
+// פותח את ממשק הניהול של שיעור ספציפי (להוספה/הסרה של מתאמנים)
 function openClassManager(classId) {
     if (!isAdmin) return;
 
@@ -388,6 +408,7 @@ function openClassManager(classId) {
     loadManagerData(classId);
 }
 
+// טוען את רשימת הנרשמים והממתינים לשיעור הנבחר
 function loadManagerData(classId) {
     fetch(`/class-participants/${classId}`)
         .then(res => res.json())
@@ -425,6 +446,7 @@ function loadManagerData(classId) {
         });
 }
 
+// מנהל: מסיר מתאמן ספציפי מהשיעור
 function adminRemoveUser(userEmail, classId) {
     showConfirm('האם להסיר את המתאמן מהשיעור?', function () {
         fetch('/cancel-registration', {
@@ -443,10 +465,13 @@ function adminRemoveUser(userEmail, classId) {
     });
 }
 
-// ===================== לוגיקת משתמש רגיל =====================
+// מתאמן
 
+// מבצע רישום של המשתמש לשיעור (כולל בדיקות מנוי ומגבלות)
 function registerForClass(classId, isWaitlist) {
     const uId = sessionStorage.getItem('userId');
+    
+    // האם המשתמש מחובר? אם לא - מפנה לדף התחברות
     if (!uId) {
         showConfirm('יש להתחבר כדי להירשם. לעבור להתחברות?', function () {
             window.location.href = 'login.html';
@@ -460,6 +485,7 @@ function registerForClass(classId, isWaitlist) {
     const membershipType = localStorage.getItem('userMembershipType') || 'guest';
     const isZoomClass = !!classItem.zoom;
 
+    // טיפול במנויי זום - חסימת רישום 
     if (membershipType === 'zoom') {
         if (isZoomClass) {
             showMessage("מנוי זום לא צריך להירשם לשיעור.\nתיכנס לשיעור 5 דקות לפני שהשיעור מתחיל");
@@ -473,6 +499,7 @@ function registerForClass(classId, isWaitlist) {
     if (membershipType === 'gym_1perweek') weeklyLimit = 1;
     if (membershipType === 'gym_2perweek') weeklyLimit = 2;
 
+    // בדיקת מכסת שיעורים שבועית (למנויים מוגבלים) - ספירה וחסימה אם חרגו
     if (weeklyLimit !== Infinity) {
         const targetDate = new Date(classItem.class_date);
         const dayOfTarget = targetDate.getDay();
@@ -497,6 +524,7 @@ function registerForClass(classId, isWaitlist) {
         }
     }
 
+    // אם כל הבדיקות עברו תקין, שולחים את הבקשה לשרת
     fetch('/register-class', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -511,6 +539,7 @@ function registerForClass(classId, isWaitlist) {
         });
 }
 
+// מבטל רישום לשיעור
 function cancelRegistration(classId) {
     const uId = sessionStorage.getItem('userId');
     showConfirm('לבטל את הרישום?', function () {
@@ -530,6 +559,7 @@ function cancelRegistration(classId) {
     });
 }
 
+// מציג את רשימת המשתתפים בחלונית צפה 
 function showParticipants(element, classId) {
     const tooltip = element.querySelector('.participants-tooltip');
     if (tooltip.dataset.loaded === "true") return;
@@ -552,7 +582,7 @@ function showParticipants(element, classId) {
         });
 }
 
-// --- פונקציה חדשה: מציגה את רשימת הממתינים ב-Tooltip ---
+// מציג את רשימת ההמתנה בחלונית צפה 
 function showWaitlistParticipants(element, classId) {
     const tooltip = element.querySelector('.participants-tooltip');
     if (tooltip.dataset.loaded === "true") return;
@@ -560,7 +590,7 @@ function showWaitlistParticipants(element, classId) {
     fetch(`/class-participants/${classId}`)
         .then(res => res.json())
         .then(users => {
-            // מסננים רק את מי שב-waitlist
+            // מסננים רק את רשימת ההמתנה
             const waitlistOnly = users.filter(u => u.status === 'waitlist');
 
             if (waitlistOnly.length === 0) {
@@ -577,8 +607,9 @@ function showWaitlistParticipants(element, classId) {
         });
 }
 
-// ========= חישוב שבוע וציון שם היום לכל עמודה =========
+// חישוב שבוע וציון שם היום לכל עמודה 
 
+// מעדכן את התאריכים המוצגים בכותרות של כל יום בשבוע
 function setWeeklyDates() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -607,6 +638,7 @@ function setWeeklyDates() {
     }
 }
 
+// מחליף שבוע קדימה או אחורה ומעדכן את הנתונים
 function changeWeek(direction) {
     if (!isAdmin && direction > 0 && maxClassDate) {
         const today = new Date();
@@ -625,11 +657,13 @@ function changeWeek(direction) {
     loadData();
 }
 
+// מחזיר את התצוגה לשבוע הנוכחי
 function goToCurrentWeek() {
     currentWeekOffset = 0;
     loadData();
 }
 
+// מסתיר את כפתור "שבוע הבא" למשתמשים אם אין שם שיעורים
 function updateNextWeekButtonVisibility() {
     const nextBtn = document.getElementById('btn-next-week');
     if (!nextBtn) return;
@@ -666,8 +700,9 @@ function updateNextWeekButtonVisibility() {
     }
 }
 
-// ===== openModal עם עדכון יום לפי תאריך =====
+// מנהל
 
+// פותח את המודל להוספה או עריכה של שיעור
 function openModal(classId = null) {
     const modalElement = document.getElementById('classModal');
     const modalTitle = document.getElementById('modalTitle');
@@ -712,6 +747,7 @@ function openModal(classId = null) {
     modal.show();
 }
 
+// שולח את נתוני הטופס (יצירה/עדכון שיעור) לשרת
 function submitClassForm() {
     const classId = document.getElementById('classId').value;
     const classData = {
@@ -744,6 +780,7 @@ function submitClassForm() {
         });
 }
 
+// מוחק שיעור מהמערכת
 function deleteClass(id) {
     showConfirm('האם למחוק את השיעור הזה?', function () {
         fetch(`/delete-class/${id}`, { method: 'DELETE' }).then(res => res.json()).then(data => {
@@ -752,6 +789,7 @@ function deleteClass(id) {
     });
 }
 
+// מוסיף הודעה חדשה ללוח המודעות
 function addNewNotice() {
     const content = document.getElementById('newNoticeInput').value;
     if (!content) return;
@@ -765,12 +803,14 @@ function addNewNotice() {
     });
 }
 
+// מוחק הודעה מלוח המודעות
 function deleteMessage(id) {
     showConfirm('האם למחוק את ההודעה מהלוח?', function () {
         fetch(`/delete-message/${id}`, { method: 'DELETE' }).then(() => loadData());
     });
 }
 
+// פותח/סוגר את תפריט חיפוש המשתמשים בניהול השיעור
 function toggleUserDropdown() {
     const container = document.getElementById('custom-dropdown-container');
     const input = document.getElementById('user-search-input');
@@ -785,6 +825,7 @@ function toggleUserDropdown() {
     }
 }
 
+// בוחר משתמש מרשימת החיפוש ומציג אותו
 function selectUserFromList() {
     const select = document.getElementById('all-users-select');
     const triggerText = document.getElementById('selected-user-text');
@@ -800,7 +841,7 @@ function selectUserFromList() {
     }
 }
 
-// הוספנו פרמטר אופציונלי forceWaitlist
+// מוסיף משתמש ידנית לשיעור (מטפל גם בהוספה להמתנה אם מלא)
 function adminAddUserToClass(forceWaitlist = false) {
     const select = document.getElementById('all-users-select');
     const userEmail = select.value;
@@ -817,7 +858,7 @@ function adminAddUserToClass(forceWaitlist = false) {
         body: JSON.stringify({
             userId: userEmail,
             classId: currentManagingClassId,
-            asWaitlist: forceWaitlist // שולחים לשרת אם זה להמתנה
+            asWaitlist: forceWaitlist 
         })
     })
         .then(res => res.json())
@@ -826,7 +867,6 @@ function adminAddUserToClass(forceWaitlist = false) {
                 showMessage(data.message);
                 loadData();
 
-                // איפוס ה-Dropdown
                 select.value = "";
                 const triggerText = document.getElementById('selected-user-text');
                 if (triggerText) {
@@ -835,10 +875,10 @@ function adminAddUserToClass(forceWaitlist = false) {
                 }
 
             } else {
-                // --- כאן השינוי: זיהוי אם השיעור מלא ---
+                // זיהוי אם השיעור מלא
                 if (data.code === 'CLASS_FULL') {
                     showConfirm(data.message, function () {
-                        // אם המנהלת לחצה "אישור" -> מנסים שוב, הפעם להמתנה
+                        // אם המנהלת לחצה "אישור" מעבירים להמתנה
                         adminAddUserToClass(true);
                     });
                 } else {
@@ -848,6 +888,7 @@ function adminAddUserToClass(forceWaitlist = false) {
         });
 }
 
+// בונה את רשימת המשתמשים 
 function renderUserSelect(usersList) {
     const select = document.getElementById('all-users-select');
     select.innerHTML = '';
@@ -867,6 +908,7 @@ function renderUserSelect(usersList) {
     });
 }
 
+// מסנן את רשימת המשתמשים לפי טקסט החיפוש
 function filterUsersList() {
     const input = document.getElementById('user-search-input');
     const filter = input.value.toLowerCase();
@@ -880,6 +922,7 @@ function filterUsersList() {
     renderUserSelect(filteredUsers);
 }
 
+// סוגר את רשימת החיפוש אם לוחצים מחוץ לה
 document.addEventListener('click', function (event) {
     const wrapper = document.querySelector('.select-wrapper');
     const container = document.getElementById('custom-dropdown-container');

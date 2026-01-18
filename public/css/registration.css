@@ -1,4 +1,4 @@
-/* Registration form Container */
+/* עיצוב העמוד הראשי של טופס ההרשמה */
 .registirationForm {
     max-width: 650px;
     margin: 40px auto;
@@ -8,13 +8,13 @@
     border-radius: 8px;
 }
 
-/* Matching password */
+/* אימות סיסמה מוצלח */
 .input-success {
     border: 2px solid #4CAF50;
     background-color: #e8f5e9;
 }
 
-/* Password does not match */
+/* סיסמא לא תואמת */
 .input-error {
     border: 2px solid #f44336;
     background-color: #ffebee;

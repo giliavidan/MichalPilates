@@ -1,3 +1,4 @@
+// מאזין לטעינת הדף ומתחיל את הפעולות רק כשהדף מוכן 
 document.addEventListener("DOMContentLoaded", async function () {
     const profileDetailsInner = document.getElementById("profile-details-inner");
     const loginMessage = document.getElementById("profile-login-message");
@@ -6,11 +7,12 @@ document.addEventListener("DOMContentLoaded", async function () {
     const detailsSection = document.getElementById("profile-details");
     const classesSection = document.getElementById("profile-classes-section");
 
-    // --- מנגנון שחזור חיבור (חדש!) ---
+    // בדיקה אם המשתמש לא מחובר בזיכרון הדפדפן, מנסה לשחזר חיבור מול השרת
     if (!sessionStorage.getItem("isLoggedIn")) {
         try {
             const res = await fetch('/api/check-session');
             const data = await res.json();
+            // אם השרת מאשר שיש חיבור, שומרים את הפרטים מחדש בדפדפן
             if (data.isLoggedIn) {
                 sessionStorage.setItem('userId', data.user.id);
                 sessionStorage.setItem('userFirstName', data.user.firstName);
@@ -28,27 +30,29 @@ document.addEventListener("DOMContentLoaded", async function () {
     let currentUserData = {};
     let isEditMode = false;
 
+    // בדיקה אם המשתמש עדיין לא מחובר או שחסר מזהה משתמש
     if (!isLoggedIn || !userId) {
+        // מציג הודעה שיש להתחבר ומסתיר את אזורי התוכן
         if (loginMessage) loginMessage.textContent = "יש להתחבר לחשבון כדי לראות את פרטי הפרופיל והשיעורים";
         if (detailsSection) detailsSection.style.display = "none";
         if (classesSection) classesSection.style.display = "none";
         return;
     }
 
+    // אם המשתמש מחובר, מציג את אזורי התוכן ומנקה הודעות שגיאה
     if (detailsSection) detailsSection.style.display = "block";
     if (classesSection) classesSection.style.display = "block";
     if (loginMessage) loginMessage.textContent = "";
 
-    // ==============================================
-    //       חלק א': טעינת פרטי משתמש
-    // ==============================================
 
+    // פונקציה ששולחת בקשה לשרת כדי לקבל את פרטי המשתמש הנוכחי
     function fetchUserData() {
         fetch(`/api/user-info?userId=${userId}`)
             .then(res => res.json())
             .then(user => {
                 if (user.error) return;
                 currentUserData = user;
+                // הצגת הפרטים על המסך (במצב צפייה רגיל)
                 renderUserDetails(false);
             })
             .catch(err => console.error(err));
@@ -56,13 +60,16 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     fetchUserData();
 
+    // פונקציה שאחראית על פרטי המשתמש (צפייה או עריכה)
     function renderUserDetails(editMode) {
         profileDetailsInner.innerHTML = '';
 
         if (!editMode) {
+            // הגדרת כפתור העריכה למצב התחלתי
             editBtn.textContent = "עריכת פרטים";
             editBtn.className = "btn btn-edit-details";
 
+            // הוספת שורות מידע לקריאה בלבד
             addRow("שם מלא:", (currentUserData.first_name || "") + " " + (currentUserData.last_name || ""));
             addRow("תאריך לידה:", formatDateToIsraeli(currentUserData.birthdate) || "");
             addRow("מקום מגורים:", currentUserData.city || "");
@@ -70,20 +77,24 @@ document.addEventListener("DOMContentLoaded", async function () {
             addRow("אימייל:", currentUserData.email || "");
             addRow("סוג מנוי:", translateMembership(currentUserData.membership_type));
         } else {
+            // מצב עריכה: שינוי הכפתור לשמירה והצגת שדות קלט
             editBtn.textContent = "שמירת שינויים";
             editBtn.className = "btn btn-success";
 
+            // הוספת שדות קלט שניתן לערוך
             addInputRow("שם פרטי:", "firstName", currentUserData.first_name);
             addInputRow("שם משפחה:", "lastName", currentUserData.last_name);
             addInputRow("תאריך לידה:", "birthdate", currentUserData.birthdate, "date");
             addInputRow("מקום מגורים:", "city", currentUserData.city);
             addInputRow("טלפון:", "phone", currentUserData.phone);
 
+            // שדות שלא ניתן לערוך מוצגים כטקסט רגיל
             addRow("אימייל (לא ניתן לשינוי):", currentUserData.email);
             addRow("סוג מנוי:", translateMembership(currentUserData.membership_type));
         }
     }
 
+    // מאזין ללחיצה על כפתור עריכה/שמירה
     editBtn.addEventListener("click", function () {
         if (!isEditMode) {
             isEditMode = true;
@@ -93,6 +104,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         }
     });
 
+    // פונקציה שאוספת את הנתונים מהשדות ושולחת עדכון לשרת
     function saveUserData() {
         const updatedData = {
             email: userId,
@@ -103,6 +115,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             phone: document.getElementById("input-phone").value
         };
 
+        // שליחת בקשת עדכון לשרת
         fetch('/api/update-user', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -113,6 +126,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                 if (data.success) {
                     showMessage("הפרטים עודכנו בהצלחה");
                     isEditMode = false;
+                    // טעינה מחדש של הנתונים המעודכנים והצגתם
                     fetchUserData();
                     sessionStorage.setItem('userFirstName', updatedData.firstName);
                 } else {
@@ -125,12 +139,11 @@ document.addEventListener("DOMContentLoaded", async function () {
             });
     }
 
-    // ==============================================
-    //       חלק ב': שיעורים
-    // ==============================================
 
+    // שיעורים
     loadMyClasses(userId);
 
+    // פונקציה שטוענת את השיעורים העתידיים של המשתמש מהשרת
     function loadMyClasses(uid) {
         fetch(`/api/my-classes?userId=${uid}`)
             .then(res => res.json())
@@ -140,10 +153,12 @@ document.addEventListener("DOMContentLoaded", async function () {
                 const titleEl = document.querySelector('#profile-classes-section .section-title');
                 if (titleEl) titleEl.textContent = "השיעורים הקרובים שלי";
 
+                // אם אין שיעורים, מציג הודעה מתאימה
                 if (!classes || classes.length === 0) {
                     profileClassesContainer.innerHTML = '<p class="text-center text-muted">אין שיעורים קרובים כרגע.</p>';
                     return;
                 }
+                // יצירת כרטיסייה עבור כל שיעור ברשימה
                 classes.forEach(cls => createClassCard(cls));
             })
             .catch(err => {
@@ -152,10 +167,12 @@ document.addEventListener("DOMContentLoaded", async function () {
             });
     }
 
+    // פונקציה שיוצרת את הכרטיסיות לשיעור בודד
     function createClassCard(cls) {
         const card = document.createElement("div");
         card.className = "profile-class-card";
 
+        // לחיצה על הכרטיסייה מעבירה ללוח השיעורים באותו תאריך
         card.onclick = function () {
             window.location.href = `schedule.html?date=${cls.class_date}`;
         };
@@ -164,11 +181,13 @@ document.addEventListener("DOMContentLoaded", async function () {
         const startTime = cls.start_time.substring(0, 5);
         const endTime = cls.end_time.substring(0, 5);
 
+        // יצירת כותרת השיעור
         const titleDiv = document.createElement("div");
         titleDiv.className = "profile-class-title";
         titleDiv.textContent = cls.class_name;
         if (cls.zoom) titleDiv.innerHTML += ` <span class="badge bg-primary" style="font-size:0.7em;">ZOOM</span>`;
 
+        // יצירת המידע על הזמן והתאריך
         const metaDiv = document.createElement("div");
         metaDiv.className = "profile-class-meta";
         metaDiv.innerHTML = `
@@ -176,10 +195,12 @@ document.addEventListener("DOMContentLoaded", async function () {
             <span style="direction: ltr; display: inline-block;">${startTime} - ${endTime}</span>
         `;
 
+        // יצירת כפתור ביטול רישום
         const cancelBtn = document.createElement("button");
         cancelBtn.className = "btn-cancel-class";
         cancelBtn.textContent = "ביטול רישום";
 
+        // מניעת הפעלת הלחיצה על הכרטיסייה בעת לחיצה על כפתור הביטול
         cancelBtn.onclick = function (e) {
             e.stopPropagation();
             cancelMyClass(cls.id);
@@ -192,9 +213,11 @@ document.addEventListener("DOMContentLoaded", async function () {
         profileClassesContainer.appendChild(card);
     }
 
+    // פונקציה לביטול רישום לשיעור ספציפי
     function cancelMyClass(classId) {
-        // שאלה מעוצבת עם popup גלובלי
+        // מציג חלונית אישור לפני הביצוע
         showConfirm("האם לבטל את הרישום לשיעור זה?", function () {
+            // שליחת בקשת ביטול לשרת
             fetch('/cancel-registration', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -203,7 +226,7 @@ document.addEventListener("DOMContentLoaded", async function () {
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
-                        // לא מציגים הודעה נוספת, רק מרעננים את רשימת השיעורים
+                        // אם הצליח, מרענן את רשימת השיעורים
                         loadMyClasses(userId);
                     } else {
                         const msg = data.message ? "שגיאה בביטול: " + data.message : "אירעה שגיאה בביטול השיעור";
@@ -214,14 +237,12 @@ document.addEventListener("DOMContentLoaded", async function () {
                     showMessage("לא ניתן לבטל את השיעור כרגע. נסי/ה שוב מאוחר יותר.");
                 });
         }, function () {
-            // בחרו ביטול – לא עושים כלום
         });
     }
 
-    // ==============================================
-    //       פונקציות עזר
-    // ==============================================
 
+
+    // ממירה תאריך מפורמט אמריקאי לישראלי
     function formatDateToIsraeli(dateStr) {
         if (!dateStr) return "";
         const parts = dateStr.split('-');
@@ -229,6 +250,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         return `${parts[2]}/${parts[1]}/${parts[0]}`;
     }
 
+    // מוסיפה שורה של מידע לרשימת הפרטים
     function addRow(label, value) {
         const row = document.createElement("div");
         row.className = "profile-row";
@@ -236,6 +258,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         profileDetailsInner.appendChild(row);
     }
 
+    // מוסיפה שורת קלט לעריכת פרטים
     function addInputRow(label, fieldName, value, type = "text") {
         const row = document.createElement("div");
         row.className = "profile-row";
@@ -259,6 +282,7 @@ document.addEventListener("DOMContentLoaded", async function () {
         profileDetailsInner.appendChild(row);
     }
 
+    // מתרגמת את קוד סוג המנוי מהמסד נתונים לשם קריא בעברית
     function translateMembership(type) {
         if (type === "gym_1perweek") return "מנוי סטודיו (שיעור 1 בשבוע)";
         if (type === "gym_2perweek") return "מנוי סטודיו (2 שיעורים בשבוע)";

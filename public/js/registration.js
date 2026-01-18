@@ -1,56 +1,63 @@
+// פונקציה למניעת מספרים בשם
 function containsNumbers(str) {
     return /\d/.test(str);
 }
 
+// פונקציה לבדיקת תקינות כתובת אימייל 
 function isValidEmail(email) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-// Function to calculate age based on birthdate
+// פונקציה לחישוב הגיל לפי תאריך הלידה
 function calculateAge(birthDateString) {
     const today = new Date();
     const birthDate = new Date(birthDateString);
-
     let age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
-
-    // Check if birthday hasn't occurred yet this year
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
         age--;
     }
     return age;
 }
 
-// Page Load & Initial Settings 
-document.addEventListener('DOMContentLoaded', function () {
+// פונקציה המציגה או מסתירה שדות הרשמה (הרגלים ומנוי) בהתאם לתפקיד שנבחר
+function toggleClientFields() {
+    const role = document.querySelector('input[name="userRole"]:checked').value;
+    const habitsSec = document.getElementById('habitsSection');
+    const memberSec = document.getElementById('membershipSection');
+    
+    // אם המשתמש בחר "מנהל", נסתיר את השדות. אחרת נציג אותם.
+    if (role === 'admin') {
+        habitsSec.style.display = 'none';
+        memberSec.style.display = 'none';
+    } else {
+        habitsSec.style.display = 'block';
+        memberSec.style.display = 'block';
+    }
+}
 
-    // Restrict birth year range
+// מאזין לטעינת הדף ורק אז מריץ את ההגדרות הראשוניות
+document.addEventListener('DOMContentLoaded', function () {
     const birthdateInput = document.getElementById('birthdate');
+    
+    // הגדרת טווח תאריכים חוקי לשדה תאריך הלידה
     if (birthdateInput) {
-        const today = new Date().toISOString().split('T')[0]; // Current date in yyyy-mm-dd format
+        const today = new Date().toISOString().split('T')[0];
         const minDate = '1925-01-01';
         birthdateInput.setAttribute('min', minDate);
         birthdateInput.setAttribute('max', today);
     }
 
-    // Real-time password validation (Live feedback)
     const passInput = document.getElementById('password');
     const confirmPassInput = document.getElementById('confirmPassword');
 
+    // בדיקה בזמן אמת האם הסיסמאות תואמות (ושינוי צבע המסגרת בהתאם)
     if (passInput && confirmPassInput) {
         confirmPassInput.addEventListener('input', function () {
             const password = passInput.value;
             const confirmPassword = confirmPassInput.value;
-
-            // Reset classes (clear previous state)
             confirmPassInput.classList.remove('input-success', 'input-error');
-
-            // Do nothing if the field is empty
-            if (confirmPassword === '') {
-                return;
-            }
-
-            // Check for match
+            if (confirmPassword === '') return;
             if (password === confirmPassword) {
                 confirmPassInput.classList.add('input-success');
             } else {
@@ -58,17 +65,19 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+    
+    // הפעלה ראשונית של הסתרת/הצגת שדות למקרה שהדף נטען מחדש
+    toggleClientFields();
 });
-
-// Main Script
 
 const registrationForm = document.getElementById('registration-Form');
 
+// מאזין לשליחת טופס ההרשמה 
 if (registrationForm) {
     registrationForm.addEventListener('submit', function (e) {
         e.preventDefault();
 
-        // Required fields validation (Loop)
+        //  בדיקת שדות חובה כלליים 
         const requiredIds = ['firstName', 'lastName', 'birthdate', 'phoneNumber', 'email', 'password', 'confirmPassword'];
         for (let id of requiredIds) {
             const element = document.getElementById(id);
@@ -80,123 +89,120 @@ if (registrationForm) {
             }
         }
 
-        // Validate training habits selection
-        if (!document.querySelector('input[name="trainingHabits"]:checked')) {
-            showMessage('נא לבחור הרגלי אימון');
-            return;
+        // בדיקת תפקיד נבחר
+        const role = document.querySelector('input[name="userRole"]:checked').value;
+
+        // משתנים לשדות המיוחדים
+        let selectedHabits = null;
+        let selectedMembership = null;
+
+        // אם הנרשם הוא לקוח, בודקים שדות הרגלי אימון ומנוי
+        if (role === 'client') {
+            const habitsRadio = document.querySelector('input[name="trainingHabits"]:checked');
+            if (!habitsRadio) {
+                showMessage('נא לבחור הרגלי אימון');
+                return;
+            }
+            selectedHabits = habitsRadio.value;
+
+            const membershipRadio = document.querySelector('input[name="membershipType"]:checked');
+            if (!membershipRadio) {
+                showMessage('נא לבחור סוג כרטיסייה');
+                return;
+            }
+            selectedMembership = membershipRadio.value;
+        } else {
+            // אם זה מנהל - נכניס ערכים ריקים או דיפולטיביים
+            selectedHabits = "לא רלוונטי (מנהל)";
+            selectedMembership = "admin_pass"; // או כל ערך אחר 
         }
 
-        // Validate membership type selection
-        const membershipRadio = document.querySelector('input[name="membershipType"]:checked');
-        if (!membershipRadio) {
-            showMessage('נא לבחור סוג כרטיסייה');
-            return;
-        }
-        const membershipType = membershipRadio.value;
-
-        // Validate birth year is between 1925 and current year
+        // המשך בדיקות רגילות
         const birthdateValue = document.getElementById('birthdate').value;
         const birthDateObj = new Date(birthdateValue);
         const selectedYear = birthDateObj.getFullYear();
         const currentYear = new Date().getFullYear();
 
+        // בדיקה שהשנה חוקית (בין 1925 להיום)
         if (isNaN(selectedYear) || selectedYear < 1925 || selectedYear > currentYear) {
             showMessage('שנת לידה לא תקינה!');
             return;
         }
 
-        // Age validation 
+        // בדיקת גיל מינימלי (16)
         const age = calculateAge(birthdateValue);
         if (age < 16) {
             showMessage('רישום לסטודיו מגיל 16 ומעלה');
             return;
         }
 
-        // Email validation
+        // בדיקת תקינות אימייל
         const email = document.getElementById('email').value;
         if (!isValidEmail(email)) {
-            showMessage('כתובת המייל שהוזנה אינה תקינה. נא לוודא שיש @ ונקודה.');
+            showMessage('כתובת המייל שהוזנה אינה תקינה.');
             return;
         }
 
-        const storedEmail = localStorage.getItem('userEmail');
-
-        // check for existing user with same email
-        if (storedEmail && storedEmail === email) {
-            showMessage('משתמש עם כתובת המייל הזו כבר קיים במערכת! נא לעבור להתחברות או להשתמש במייל אחר.');
-            return; // Stop registration    
-        }
-
-        // Phone number validation
+        // בדיקת אורך מספר טלפון (7 ספרות ללא קידומת)
         const phoneNumber = document.getElementById('phoneNumber').value;
         if (phoneNumber.length !== 7) {
-            showMessage('מספר הטלפון חייב להכיל בדיוק 7 ספרות (ללא הקידומת)');
+            showMessage('מספר הטלפון חייב להכיל בדיוק 7 ספרות');
             return;
         }
 
-        // Name validation (ensure no numbers)
         const firstName = document.getElementById('firstName').value;
         const lastName = document.getElementById('lastName').value;
         const city = document.getElementById('city').value;
 
-        if (containsNumbers(firstName)) {
-            showMessage('שם פרטי לא יכול להכיל מספרים');
-            return;
-        }
-        if (containsNumbers(lastName)) {
-            showMessage('שם משפחה לא יכול להכיל מספרים');
-            return;
-        }
-        if (city.length > 0 && containsNumbers(city)) {
-            showMessage('שם העיר לא יכול להכיל מספרים');
+        // וידוא שאין מספרים בשם הפרטי או המשפחה
+        if (containsNumbers(firstName) || containsNumbers(lastName)) {
+            showMessage('שם לא יכול להכיל מספרים');
             return;
         }
 
-        // Password matching validation
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
 
+        // בדיקה שהסיסמאות זהות
         if (password !== confirmPassword) {
             showMessage('הסיסמאות אינן תואמות!');
             return;
         }
 
-        // Password complexity validation
-        const hasLetters = /[a-zA-Z\u0590-\u05FF]/.test(password); // checks for letters He + En
-        const hasNumbers = /\d/.test(password);    // checks for numbers
+        // בדיקת מורכבות סיסמה (אותיות ומספרים)
+        const hasLetters = /[a-zA-Z\u0590-\u05FF]/.test(password);
+        const hasNumbers = /\d/.test(password);
 
         if (!hasLetters || !hasNumbers) {
             showMessage('הסיסמא חייבת להכיל שילוב של אותיות ומספרים!');
             return;
         }
 
-        // 1. יצירת אובייקט עם כל הנתונים
+        // יצירת האובייקט עם כל הנתונים לשליחה לשרת
         const userData = {
             email: email,
             password: password,
-            firstName: document.getElementById('firstName').value,
-            lastName: document.getElementById('lastName').value,
+            firstName: firstName,
+            lastName: lastName,
             phone: document.getElementById('phonePrefix').value + '-' + phoneNumber,
             birthdate: birthdateValue,
-            city: document.getElementById('city').value,
-            trainingHabits: document.querySelector('input[name="trainingHabits"]:checked').value,
-            membershipType: membershipRadio.value,
-            comments: document.getElementById('comments').value
+            city: city,
+            trainingHabits: selectedHabits,
+            membershipType: selectedMembership,
+            comments: document.getElementById('comments').value,
+            role: role
         };
 
-        // 2. שליחת הבקשה לשרת (fetch)
+        // שליחת בקשת הרשמה לשרת
         fetch('/registration', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(userData)
         })
             .then(response => {
+                // טיפול בתשובה מהשרת - אם ההרשמה הצליחה
                 if (response.ok) {
-                    // ההרשמה הצליחה!
-                    showMessage('ההרשמה בוצעה בהצלחה! מועבר להתחברות...');
-                    // מעבר לדף התחברות אחרי סגירת ההודעה
+                    showMessage('ההרשמה בוצעה בהצלחה! מועבר להתחברות');
                     const overlay = document.getElementById('global-message-overlay');
                     const okBtn = document.getElementById('global-message-ok');
                     if (overlay && okBtn) {
@@ -208,10 +214,11 @@ if (registrationForm) {
                         window.location.href = 'login.html';
                     }
                 } else {
-                    // הייתה שגיאה בשרת (למשל אימייל כפול)
+                    // אם הייתה שגיאה בצד השרת, מציג את הודעת השגיאה
                     return response.text().then(text => { showMessage(text); });
                 }
             })
+            // טיפול בשגיאות תקשורת
             .catch(error => {
                 console.error('Error:', error);
                 showMessage('שגיאת תקשורת עם השרת');

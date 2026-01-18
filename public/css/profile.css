@@ -1,4 +1,4 @@
-/* Profile container - Renamed for clarity */
+/* המיכל הראשי של הפרופיל */
 .profile-card-container {
     max-width: 800px;
     margin: 40px auto;
@@ -8,6 +8,7 @@
     border-radius: 10px;
 }
 
+/* הכותרת העליונה של הדף */
 .profile-header {
     text-align: center;
     margin-bottom: 20px;
@@ -17,12 +18,13 @@
     margin-bottom: 24px;
 }
 
+/* כותרות המשנה */
 .section-title {
     font-size: 1.2rem;
     margin-bottom: 10px;
 }
 
-/* title + edit button */
+/* שורה עליונה שמכילה את הכותרת וכפתור העריכה */
 .profile-top-row {
     display: flex;
     justify-content: space-between;
@@ -30,7 +32,7 @@
     margin-bottom: 8px;
 }
 
-/* User details rows */
+/* שורה בודדת של פרטי משתמש (תווית וערך) */
 .profile-row {
     display: flex;
     justify-content: flex-start;
@@ -39,6 +41,7 @@
     border-bottom: 1px solid #eee;
 }
 
+/*  התווית (למשל "שם מלא:") */
 .profile-row-label {
     font-weight: 500;
     min-width: 110px;
@@ -49,7 +52,7 @@
     color: #333;
 }
 
-/* Class cards */
+/* כרטיסייה של שיעור */
 .profile-class-card {
     border: 1px solid #ddd;
     border-radius: 8px;
@@ -67,20 +70,20 @@
     color: #555;
 }
 
-/* Button to schedule page*/
+/* כפתור למעבר למערכת השעות */
 .btn-move-to-schedule {
     margin-top: 10px;
     width: 100%;
     max-width: 250px;
 }
 
-/* Edit profile button */
+/*  כפתור "עריכת פרטים" */
 .btn-edit-details {
     padding: 4px 15px;
     font-size: 0.9rem;
 }
 
-/* Profile message when user is logged out */
+/* עיצוב הודעת יש להתחבר */
 .profile-login-message {
     margin-bottom: 16px;
     color: var(--lightblack);
@@ -88,7 +91,7 @@
     text-align: center;
 }
 
-/* --- כפתור ביטול שיעור (במקום עיצוב ב-JS) --- */
+/* כפתור ביטול שיעור */
 .btn-cancel-class {
     width: 15%;
     margin-top: 10px;
@@ -107,20 +110,20 @@
     color: white;
 }
 
-/* --- הופך את כל הכרטיסייה ללחיצה (עבור המעבר למערכת) --- */
+/* הופך את הכרטיסייה לאינטראקטיבית */
 .profile-class-card {
-    /* העיצוב הקיים שלך נשאר, נוסיף רק את זה: */
     cursor: pointer;
     transition: transform 0.2s;
     position: relative;
 }
 
+/* אפקט ריחוף לכרטיסייה */
 .profile-class-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* --- עיצוב שדות עריכה (Input) --- */
+/* עיצוב שדות הקלט במצב עריכה */
 .profile-edit-input {
     width: 100%;
     padding: 5px;

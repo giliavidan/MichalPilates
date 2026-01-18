@@ -1,4 +1,4 @@
-/* Main container layout */
+/* הגדרת המיכל הראשי*/
 .main-container {
     display: flex;
     justify-content: center;
@@ -10,18 +10,20 @@
     margin: 0 auto;
 }
 
+/* אזור ההתחברות */
 .login-section {
     flex: 1;
     max-width: 400px;
     text-align: center;
 }
 
-/* Image next to the Box */
+/* עטיפה לתמונה */
 .image-wrapper {
     display: flex;
     justify-content: center;
 }
 
+/* עיצוב התמונה האנכית */
 .vertical-image {
     max-height: 500px;
     width: auto;
@@ -30,7 +32,7 @@
     border-radius: 4px;
 }
 
-/* Login Box */
+/* עיצוב קופסת ההתחברות */
 .login-box {
     border: 1px solid var(--lightbrown);
     padding: 30px;
@@ -40,13 +42,14 @@
     margin-top: 20px;
 }
 
-/* Form Styles */
+/* שורת טופס */
 .form-row {
     display: flex;
     align-items: center;
     margin-bottom: 15px;
 }
 
+/* עיצוב התווית  */
 .form-row label {
     width: 80px;
     margin-left: 10px;
@@ -56,6 +59,7 @@
     color: var(--lightblack);
 }
 
+/* שדה הקלט  */
 .form-row input {
     flex: 1;
     padding: 8px;
@@ -64,9 +68,7 @@
     background-color: #fff;
 }
 
-/* Login and Register Buttons */
-/* Overwrite the 'global.css' to deal with bootstrap Settings 
-(בהגדרות של הכרטיסייה הייתה בעיה בלחיצה על הכפתור ולכן היינו צריכות לדרוס את העיצוב הכללי) */
+/* כפתור ההתחברות והרשמה */
 .login-page-btn {
     width: 100% !important;
     margin-top: 10px;
@@ -77,7 +79,7 @@
     color: var(--lightbeigh0);
 }
 
-/* button hover, focus, active states */
+/* מצבי מעבר עכבר, פוקוס ולחיצה */
 .login-page-btn:hover,
 .login-page-btn:focus,
 .login-page-btn:active,
@@ -86,7 +88,6 @@
     color: var(--button) !important;
     border: 1.4px solid var(--button) !important;
 
-    /* blue outline removal */
     outline: none !important;
     box-shadow: none !important;
 }

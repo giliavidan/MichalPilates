@@ -88,13 +88,12 @@ function generateNextWeekClasses(callback) {
 // ==========================================
 
 app.post('/registration', (req, res) => {
-  const { email, password, firstName, lastName, phone, birthdate, city, trainingHabits, membershipType, comments } = req.body;
+  const { email, password, firstName, lastName, phone, birthdate, city, trainingHabits, membershipType, comments, role } = req.body;
   const query = `INSERT INTO users (email, password, first_name, last_name, phone, birthdate, city, training_habit, membership_type, comments, role) 
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'client')`;
-
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
   db.query(
     query,
-    [email, password, firstName, lastName, phone, birthdate, city, trainingHabits, membershipType, comments],
+    [email, password, firstName, lastName, phone, birthdate, city, trainingHabits, membershipType, comments, role || 'client'],
     (err) => {
       if (err) {
         console.error(err);

@@ -1,4 +1,4 @@
- /* Main Footer Container */
+/* הגדרת המיכל הראשי של הפוטר */
  .site-footer {
      background-color: #f8f9fa;
      padding: 40px 20px;
@@ -8,7 +8,7 @@
      box-sizing: border-box;
  }
 
- /* Inner Content Wrapper */
+ /* מיכל התוכן הפנימי: מגביל את הרוחב המקסימלי ומסדר את האלמנטים בטור ממורכז */
  .footer-content {
      max-width: 1200px;
      margin: 0 auto;
@@ -18,11 +18,12 @@
      align-items: center;
  }
 
- /* Designing social media icons*/
+ /* מרווח תחתון לאזור האייקונים של הרשתות החברתיות */
  .social-links {
      margin-bottom: 10px;
  }
 
+ /* עיצוב הקישורים (אייקונים) עצמם */
  .social-links a {
      color: gray;
      font-size: 28px;
@@ -33,11 +34,12 @@
      font-size: 35px;
  }
 
+ /*  שינוי צבע האייקון שעומדים עליו */
  .social-links a:hover {
      color: lightgray;
  }
 
- /* Legal links and copyright */
+ /* סידור הקישורים (תקנון, פרטיות)  */
  .legal-links {
      display: flex;
      gap: 20px;
@@ -50,11 +52,13 @@
      transition: color 0.3s;
  }
 
+ /* בעת מעבר עכבר על קישור  */
  .legal-links a:hover {
      text-decoration: underline;
      color: #000;
  }
 
+ /* עיצוב שורת זכויות היוצרים */
  .copyright {
      margin-top: 20px;
      font-size: 12px;

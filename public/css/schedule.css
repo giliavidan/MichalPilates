@@ -1,4 +1,4 @@
-/* Notice Board */
+/* לוח המודעות הראשי */
 .notice-board {
     background-color: var(--lightblue1);
     color: var(--lightblack);
@@ -8,13 +8,14 @@
     border-radius: 8px;
 }
 
+/* כותרת לוח המודעות */
 .notice-board h2 {
     margin-top: 0;
     font-size: 20px;
     padding-bottom: 10px;
 }
 
-/* Individual Notice Item */
+/* פריט מודעה בתוך הלוח */
 .notice-item {
     background-color: rgba(255, 255, 255, 0.5);
     padding: 10px;
@@ -22,7 +23,7 @@
     border-radius: 5px;
 }
 
-/* Weeks Navigation Container */
+/* כפתורי הניווט בין שבועות */
 .week-navigation {
     display: flex;
     justify-content: space-between;
@@ -32,21 +33,20 @@
     padding: 0 10px;
 }
 
-
-/* Navigation Buttons Specifics */
 .nav-btn {
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-/* Schedule Container & Grid */
+/* עיצוב ראשי של מערכת השעות */
 .schedule-container {
     max-width: 1400px;
     margin: 0 auto 40px auto;
     padding: 0 10px;
 }
 
+/* רשת השבוע מחולק ל-6 עמודות שוות (א'-ו') */
 .week-grid {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
@@ -55,12 +55,13 @@
     margin: 0 auto;
 }
 
+/* עמודה יומית בודדת */
 .day-column {
     display: flex;
     flex-direction: column;
 }
 
-/* Dates & Headers within the grid */
+/* התאריך המוצג מעל כל יום */
 .date-display {
     text-align: center;
     font-weight: bold;
@@ -69,6 +70,7 @@
     font-size: 22px;
 }
 
+/* כותרת היום */
 .day-header {
     text-align: center;
     background-color: var(--button);
@@ -79,6 +81,7 @@
     font-size: 20px;
 }
 
+/* גוף העמודה שמכיל את הכרטיסיות */
 .day-content {
     background-color: white;
     padding: 10px;
@@ -88,7 +91,7 @@
     flex: 1;
 }
 
-/* Class Card */
+/* כרטיסייה של שיעור בודד */
 .class-card {
     background-color: var(--lightgray);
     border: 1px solid var(--lightgray);
@@ -101,13 +104,14 @@
     gap: 8px;
 }
 
-/* אפקט hover רק לכרטיסים של אדמין (נקבע ב-JS עם admin-hover) */
+/* אפקט רק לכרטיסים של מנהל */
 .class-card.admin-hover:hover {
     transform: translateY(-3px);
     border-color: var(--logo);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+/* שעת השיעור בכרטיסייה */
 .class-time {
     white-space: nowrap;
     text-align: center;
@@ -116,6 +120,7 @@
     font-size: 17px;
 }
 
+/* שם השיעור */
 .class-name {
     text-align: center;
     font-size: 18px;
@@ -123,7 +128,7 @@
     color: var(--lightblack);
 }
 
-/* Number of participants */
+/* שורת פרטים נוספים (כמו כמות משתתפים) */
 .class-details {
     font-size: 13px;
     color: #555;
@@ -132,7 +137,7 @@
     align-items: center;
 }
 
-/* Zoom Link */
+/* תגית קישור לזום */
 .zoom-tag {
     background-color: #e3f2fd !important;
     color: #0d47a1 !important;
@@ -148,7 +153,7 @@
     color: #e3f2fd !important;
 }
 
-/* Registration Button (Green) */
+/* כפתור הרשמה רגיל */
 .register-btn {
     background-color: #cfe1b9;
     color: var(--lightblack);
@@ -166,7 +171,7 @@
     background-color: #adc178;
 }
 
-/* Waitlist Button */
+/* כפתור הרשמה לרשימת המתנה */
 .register-btn-waitlist {
     background-color: var(--lightblue1);
     color: var(--lightblack);
@@ -184,7 +189,7 @@
     background-color: var(--lightblue2)
 }
 
-/* Unregister button */
+/* כפתור ביטול הרשמה */
 .register-btn.registered {
     background-color: #e74c3c;
     color: white;
@@ -196,7 +201,7 @@
     border-color: #a93226;
 }
 
-/* באיזה מיקום אתה ברשימת המתנה */
+/* טקסט מידע על המיקום ברשימת ההמתנה */
 .waitlist-info {
     font-size: 0.8rem;
     color: var(--darkblue);
@@ -205,6 +210,7 @@
     text-align: center;
 }
 
+/* הגדרות כלליות לכל כפתורי ההרשמה */
 .register-btn,
 .register-btn-waitlist,
 .register-btn.registered {
@@ -216,7 +222,7 @@
     margin-right: auto;
 }
 
-/* Responsive adjustment */
+/* התאמה למסכים קטנים */
 @media (max-width: 768px) {
     .week-grid {
         grid-template-columns: 1fr;
@@ -227,11 +233,11 @@
     }
 }
 
-/* ========================================= */
-/* תוספות לממשק ניהול (Admin)              */
-/* ========================================= */
 
-/*כפתור הוספת שיעור*/
+/* תוספות לממשק ניהול  */
+
+
+/* כפתור להוספת שיעור חדש */
 #btn-add-class-mode {
     background-color: var(--lightOliveGreen);
     color: white;
@@ -246,21 +252,21 @@
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-/*הכותרת של החלון יצירת שיעור חדש*/
+/* כותרת החלון הקופץ ליצירת שיעור */
 .custom-modal-header {
     display: flex;
     flex-direction: row;
-    /* הסדר הרגיל: כותרת מימין, X בשמאל */
     justify-content: space-between;
     align-items: center;
 }
 
+/* כפתור הסגירה של החלון */
 .custom-modal-header .btn-close {
-    /*האיקס לסגירת החלון ליצירת שיעור*/
     margin-left: 0;
     margin-right: 0;
 }
 
+/* עטיפה לתיבת הסימון של הזום */
 .zoom-check-wrapper {
     display: inline-flex;
     align-items: center;
@@ -269,7 +275,7 @@
     flex-direction: row-reverse;
 }
 
-/* עיצוב הצ'ק בוקס */
+/* עיצוב תיבת הסימון */
 #isZoom {
     width: 20px;
     height: 20px;
@@ -281,16 +287,15 @@
     background-color: var(--darkerOliveGreen);
 }
 
-/* מיכל כפתורי הניהול בתוך הכרטיסייה (עריכה ומחיקה) */
+/* כפתורי הניהול בתוך כרטיסייה (עריכה ומחיקה) */
 .admin-actions {
     display: flex;
     gap: 10px;
-    /* רווח בין הכפתורים */
     justify-content: center;
     margin-top: 10px;
 }
 
-/* עיצוב לכפתורי עריכה/מחיקה */
+/* עיצוב בסיסי משותף לכפתורי עריכה ומחיקה */
 .btn-admin-edit,
 .btn-admin-delete {
     flex: 1;
@@ -305,12 +310,12 @@
     transition: opacity 0.2s;
 }
 
-/*כפתור עריכה*/
+/* צבע רקע לכפתור עריכה */
 .btn-admin-edit {
     background-color: var(--darkerOliveGreen);
 }
 
-/*כפתור מחיקה*/
+/* צבע רקע לכפתור מחיקה */
 .btn-admin-delete {
     background-color: #ae2012;
 }
@@ -318,10 +323,9 @@
 .btn-admin-edit:hover,
 .btn-admin-delete:hover {
     opacity: 0.85;
-    /* אפקט הבהרה במעבר עכבר */
 }
 
-/* איזור הוספת הודעות לוח (למנהל בלבד) */
+/* אזור הוספת הודעות ללוח */
 .admin-notice-controls {
     display: flex;
     gap: 10px;
@@ -337,9 +341,7 @@
     border-radius: 4px;
 }
 
-/* ========================================= */
-/* טולטיפ משתתפים (גם רגיל וגם רשימת המתנה) */
-/* ========================================= */
+/* רשימת משתתפים מרחפת */
 .participants-tooltip-container {
     position: relative;
     cursor: pointer;
@@ -364,19 +366,19 @@
     text-align: center;
 }
 
+/* הצגת הרשימה בעת מעבר עכבר */
 .participants-tooltip-container:hover .participants-tooltip {
     display: block;
 }
 
+/* כותרת מיוחדת בתוך הרשימה עבור רשימת המתנה */
 .waitlist-title {
     color: #76b1c9;
 }
 
-/* ========================================= */
-/* עיצוב פאנל ניהול שיעור (Add User Panel)  */
-/* ========================================= */
+/* עיצוב פאנל ניהול שיעור (הוספה/הסרת משתתפים) */
 
-/* 1. הקונטיינר הראשי של הפאנל */
+/* החלק הראשי של הפאנל */
 #admin-class-manager {
     border-top: 5px solid #c8a35f;
     margin-top: 80px !important;
@@ -388,13 +390,12 @@
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
 }
 
-/* 2. עיצוב שורת ההוספה */
-/* flex-end: הכפתור יורד למטה כדי להתיישר עם השדה (ולא עם הכותרת שמעליו) */
+/* סידור שורת ההוספה */
 #admin-class-manager .d-flex.align-items-end {
     align-items: flex-end !important;
 }
 
-/* 3. הגדרות לתיבת הבחירה - 100% רוחב כדי למלא את השורה */
+/* עטיפת תיבת הבחירה */
 #admin-class-manager .select-wrapper {
     width: auto !important;
     flex-grow: 1;
@@ -402,27 +403,25 @@
     min-width: 200px;
 }
 
-/* 4. הגדרת גובה אחיד ודק לכפתור ולשדה הבחירה */
 #admin-class-manager .btn-add-user,
 #admin-class-manager .custom-select-trigger {
     height: 38px !important;
-    /* גובה קבוע דק */
     padding: 0 15px !important;
     display: flex;
     align-items: center;
     line-height: normal;
 }
 
-/* עיצוב ספציפי לכפתור "הוסף לשיעור" */
+/* כפתור הוסף שיעור */
 #admin-class-manager .btn-add-user {
     white-space: nowrap;
     gap: 8px;
     margin-bottom: 0;
 }
 
-/* --- דרופדאון חכם (Smart Dropdown) --- */
+/* חיפוש משתמשים */
 
-/* הכפתור שפותח את הרשימה */
+/* הכפתור הראשי שפותח את הרשימה */
 .custom-select-trigger {
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -438,7 +437,7 @@
     background-color: #f9f9f9;
 }
 
-/* המיכל שנפתח */
+/* החלון שנפתח המכיל את רשימת המשתמשים */
 .custom-dropdown-content {
     position: absolute;
     top: 100%;
@@ -452,7 +451,7 @@
     padding-bottom: 5px;
 }
 
-/* הרשימה עצמה */
+/* שדה הבחירה בחלון משתמשים */
 #all-users-select {
     width: 100%;
     height: 150px;
@@ -463,13 +462,12 @@
     box-shadow: none;
 }
 
-/* כפתורים וסידור רשימת רשומים */
 #admin-class-manager .col-md-4 .btn {
     max-width: 150px;
     justify-content: flex-start;
 }
 
-/* סידור השורות ברשימה (שם בצד ימין, כפתור מחיקה בצד שמאל) */
+/* שורות ברשימת הרשומים/ממתינים */
 #list-registered .list-group-item,
 #list-waitlist .list-group-item {
     display: flex;
@@ -479,7 +477,7 @@
     border: none;
 }
 
-/* עיצוב כפתור המחיקה (X) ברשימה */
+/* כפתור המחיקת מתאמן */
 .btn-remove-user {
     background-color: #ffe6e6;
     color: #c0392b;
@@ -502,24 +500,17 @@
     transform: scale(1.1);
 }
 
-/* ========================================================= */
-/* עיצוב שורת רשימת המתנה (שעון) - מותאם למשתתפים          */
-/* ========================================================= */
+/* עיצוב שורת סטטוס ההמתנה (בתוך הכרטיסייה)  */
 .waitlist-status-row {
-    /* התאמה מלאה ל-.class-details */
     font-size: 13px;
     color: #555;
     font-weight: 400;
-    /* ביטול בולד */
-
-    /* יישור לימין (ב-RTL זה Start) */
     display: flex;
     align-items: center;
     justify-content: flex-start;
 
     gap: 6px;
     margin-top: 4px;
-    /* רווח עדין */
     margin-bottom: 4px;
     width: 100%;
 
@@ -529,5 +520,4 @@
 
 .waitlist-status-row i {
     font-size: 13px;
-    /* גודל האייקון כמו הטקסט */
 }

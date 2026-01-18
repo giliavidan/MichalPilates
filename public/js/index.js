@@ -1,5 +1,6 @@
-// Correct local links on the home page (Navbar handling)
-function fixLocalLinks() {
+
+// פונקציה לקישורים פנימיים באותו הדף
+function LocalLinks() {
   const links = document.querySelectorAll('.navbar-nav a, .dropdown-menu a');
 
   links.forEach(link => {
@@ -10,15 +11,16 @@ function fixLocalLinks() {
   });
 }
 
-// Card Management System (Hover & Click Logic)
+// מאזין לטעינת הדף ורק לאחר מכן מריץ את הלוגיקה המרכזית של הכרטיסיות
 document.addEventListener('DOMContentLoaded', () => {
 
-  fixLocalLinks();
+  LocalLinks();
 
   const cards = document.querySelectorAll('.typeOfClasses .class-card');
+  // משתנה ששומר איזו כרטיסייה "נעולה" (נשארת פתוחה לאחר לחיצה)
   let pinnedCard = null;
 
-  // Helper: Close all cards
+  // פונקציה שסוגרת את כל הכרטיסיות הפתוחות
   const closeAllCards = () => {
     cards.forEach(c => {
       const collapseElement = c.querySelector('.collapse');
@@ -29,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   };
 
-  // Helper: Open a specific card
+  // פונקציה שפותחת כרטיסייה ספציפית
   const openCard = (card) => {
     const collapseElement = card.querySelector('.collapse');
     if (collapseElement) {
@@ -38,16 +40,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // Main Logic Loop
+  // הוספת אירועי עכבר ולחיצה
   cards.forEach(card => {
 
-    // Find the trigger (Image/Text link)
+    // מציאת הכפתור/תמונה שפותח את הכרטיסייה
     const trigger = card.querySelector('a[role="button"]');
 
     if (!trigger) return;
     trigger.removeAttribute('data-bs-toggle');
 
-    // HOVER ENTER
+    // בעת עמידה עם העכבר: פותח את הכרטיסייה (רק אם אין כרטיסייה נעולה כרגע)
     card.addEventListener('mouseenter', () => {
       if (pinnedCard) return;
 
@@ -55,24 +57,24 @@ document.addEventListener('DOMContentLoaded', () => {
       openCard(card);
     });
 
-    // HOVER LEAVE
+    // בעת יציאה עם העכבר: סוגר את הכרטיסייה (אלא אם היא כרגע הנעולה)
     card.addEventListener('mouseleave', () => {
       if (pinnedCard === card) return;
 
       closeAllCards();
     });
 
-    // CLICK (Pin/Unpin Logic)
+    // בעת לחיצה: נועל או משחרר את הכרטיסייה 
     trigger.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
 
       if (pinnedCard === card) {
-        // Unlock: If clicking the already pinned card -> Close it
+        // אם לוחצים על הכרטיסייה שכבר פתוחה - משחרר את הנעילה וסוגר
         pinnedCard = null;
         closeAllCards();
       } else {
-        // Lock: If clicking a new card -> Pin it
+        // אם לוחצים על כרטיסייה חדשה - נועל אותה ופותח אותה
         pinnedCard = card;
         closeAllCards();
         openCard(card);
@@ -80,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Open card from Navbar URL
+  // בדיקה אם יש קישור ישיר בכתובת הדפדפן ופתיחת הכרטיסייה המתאימה
   const handleDeepLink = () => {
     const hash = window.location.hash;
     if (hash) {

@@ -87,11 +87,22 @@
             </div>
             <br>
 
-            <!-- Training Habits -->
             <div>
-                <label>האם מתאמן באופן קבוע?</label><br>
+                <label>סוג משתמש:</label><br>
 
-                <input type="radio" id="habit1" name="trainingHabits" value="מתאמן מעל 8 אימונים" required>
+                <input type="radio" id="role-client" name="userRole" value="client" checked>
+                <label for="role-client">מתאמן</label><br>
+
+                <input type="radio" id="role-admin" name="userRole" value="admin">
+                <label for="role-admin">מנהל</label>
+            </div>
+            <br>
+
+            <!-- Training Habits -->
+            <div id="habitsSection">
+                <label>האם אתה מתאמן באופן קבוע?</label><br>
+
+                <input type="radio" id="habit1" name="trainingHabits" value="מתאמן מעל 8 אימונים">
                 <label for="habit1">מתאמן מעל 8 אימונים בחודש</label><br>
 
                 <input type="radio" id="habit2" name="trainingHabits" value="מתאמן 4-8 אימונים">
@@ -106,10 +117,10 @@
             <br>
 
             <!-- Membership Type -->
-            <div class="membership-type">
+            <div class="membership-type" id="membershipSection">
                 <label>סוג מנוי חודשי:</label><br>
 
-                <input type="radio" id="sub-gym-1" name="membershipType" value="gym_1perweek" required>
+                <input type="radio" id="sub-gym-1" name="membershipType" value="gym_1perweek">
                 <label for="sub-gym-1">כניסה פעם בשבוע 240 ₪ לחודש</label><br>
 
                 <input type="radio" id="sub-gym-2" name="membershipType" value="gym_2perweek">
