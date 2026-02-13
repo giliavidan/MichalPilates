@@ -10,6 +10,10 @@ const port = 3000;
 const db = require('./db');
 
 
+// מאפשר לשרת למצוא את index.html שנמצא עכשיו בתיקייה הראשית
+app.use(express.static(__dirname)); 
+
+// ממשיך לאפשר לשרת למצוא את ה-CSS והתמונות שנשארו בתוך public
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
