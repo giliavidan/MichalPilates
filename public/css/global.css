@@ -24,9 +24,11 @@ body.page-loaded {
     --logo: #968069;
     --button: #A69079;
     --lightlogo: #F9F8F6;
+    --lightGreen:#cfe1b9;
     --lightOliveGreen: #b5c99a;
     --darkerOliveGreen: #97a97c;
-    --chocolate: #583101;
+    --chocolate1: #583101;
+    --chocolate2:#432818;
 }
 
 /* הגדרת פונט "Oron" */
@@ -76,12 +78,12 @@ body {
 .btn {
     display: inline-block;
     cursor: pointer;
-    border-radius: 4px;
+    border-radius: 25px;
     border: 1.4px solid var(--button);
     background-color: var(--button);
     color: var(--lightbeigh0);
     font-size: 16px;
-    padding: 5px 10px;
+    padding:5px 16px;
     text-decoration: none;
     transition: all 0.3s ease;
 }
@@ -152,3 +154,4 @@ body {
     min-width: 100px;
     max-width: 150px;
 }
+

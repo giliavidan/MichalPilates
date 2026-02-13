@@ -1,18 +1,19 @@
 /* לוח המודעות הראשי */
 .notice-board {
-    background-color: var(--lightblue1);
     color: var(--lightblack);
     padding: 20px;
     margin: 30px auto;
     max-width: 500px;
+    border: 3px solid var(--chocolate2);
     border-radius: 8px;
 }
 
 /* כותרת לוח המודעות */
 .notice-board h2 {
     margin-top: 0;
-    font-size: 20px;
+    font-size: 25px;
     padding-bottom: 10px;
+    color:var(--chocolate2);
 }
 
 /* פריט מודעה בתוך הלוח */
@@ -20,7 +21,10 @@
     background-color: rgba(255, 255, 255, 0.5);
     padding: 10px;
     margin-bottom: 10px;
-    border-radius: 5px;
+    border-radius: 10px;
+    border:none;
+    color:var(--chocolate2);
+    font-size: 25px;
 }
 
 /* כפתורי הניווט בין שבועות */
@@ -117,7 +121,7 @@
     text-align: center;
     font-weight: 400;
     color: black;
-    font-size: 17px;
+    font-size: 18px;
 }
 
 /* שם השיעור */
@@ -130,7 +134,7 @@
 
 /* שורת פרטים נוספים (כמו כמות משתתפים) */
 .class-details {
-    font-size: 13px;
+    font-size: 14px;
     color: #555;
     display: flex;
     justify-content: space-between;
@@ -155,14 +159,14 @@
 
 /* כפתור הרשמה רגיל */
 .register-btn {
-    background-color: #cfe1b9;
+    background-color:var(--lightGreen);
     color: var(--lightblack);
     border: none;
-    border-radius: 4px;
+    border-radius: 20px;
     padding: 6px 0;
     cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 16px;
+    font-weight:500;
     margin-top: 5px;
     transition: background 0.2s;
 }
@@ -234,15 +238,14 @@
 }
 
 
-/* תוספות לממשק ניהול  */
+/*** תוספות לממשק ניהול ***/
 
 
 /* כפתור להוספת שיעור חדש */
 #btn-add-class-mode {
-    background-color: var(--lightOliveGreen);
-    color: white;
+    background-color: var(--lightGreen);
+    color: black;
     border: none;
-    font-weight: bold;
     padding: 10px 25px;
     border-radius: 5px;
     margin-bottom: 20px;
@@ -302,17 +305,16 @@
     border: solid transparent 2px;
     padding: 3px 0;
     border-radius: 3px;
-    font-size: 0.9rem;
+    font-size: 1rem;
+    color:black;
     cursor: pointer;
-    border-color: var(--chocolate);
-    color: var(--lightbeigh0);
-    font-weight: bold;
     transition: opacity 0.2s;
 }
 
 /* צבע רקע לכפתור עריכה */
 .btn-admin-edit {
-    background-color: var(--darkerOliveGreen);
+    background-color: var(--lightGreen);
+    border: none;
 }
 
 /* צבע רקע לכפתור מחיקה */
@@ -322,7 +324,7 @@
 
 .btn-admin-edit:hover,
 .btn-admin-delete:hover {
-    opacity: 0.85;
+    opacity: 0.75;
 }
 
 /* אזור הוספת הודעות ללוח */

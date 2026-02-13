@@ -16,11 +16,16 @@ html {
     width: 100%;
     height: auto;
     display: block;
+   
 }
 
 /* ביטול המרווח התחתון באודות */
 .about .headers {
     margin-bottom: 0;
+}
+
+.about{
+   color: #3f403f;
 }
 
 /* טקסט התיאור */
@@ -104,6 +109,7 @@ html {
 
 /* אזור יצירת הקשר */
 .contact {
+    margin-top: 60px;
     background-color: var(--darkgray);
     color: var(--lightbeigh0);
     padding: 20px 10px;
@@ -112,14 +118,14 @@ html {
 /*  הכותרת באזור יצירת הקשר */
 .contact h3 {
     margin-bottom: 10px;
-    font-size: 28px;
+    font-size: 35px;
 }
 
 /* הטקסט הרגיל באזור יצירת הקשר */
 .contact p {
-    margin: 0;
+    margin-top: 0;
     line-height: 1.7;
-    font-size: 1.2rem;
+    font-size: 1.5rem;
 }
 
 /* קישור האימייל */
@@ -134,8 +140,9 @@ html {
     text-decoration: underline;
 }
 
-/* הפעלת אנימציית כניסה בטעינת הדף לכל הגוף */
-body {
+
+/*הפעלת אנימציית כניסה בטעינת הדף   */
+.main {
     animation: fadeInAnimation 0.8s ease-out;
 }
 

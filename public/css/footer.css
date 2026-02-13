@@ -26,12 +26,11 @@
  /* עיצוב הקישורים (אייקונים) עצמם */
  .social-links a {
      color: gray;
-     font-size: 28px;
      margin: 0 15px;
      transition: color 0.3s ease;
      text-decoration: none;
      display: inline-block;
-     font-size: 35px;
+     font-size: 50px;
  }
 
  /*  שינוי צבע האייקון שעומדים עליו */
@@ -43,7 +42,7 @@
  .legal-links {
      display: flex;
      gap: 20px;
-     font-size: 14px;
+     font-size: 18px;
  }
 
  .legal-links a {
@@ -61,7 +60,7 @@
  /* עיצוב שורת זכויות היוצרים */
  .copyright {
      margin-top: 20px;
-     font-size: 12px;
+     font-size: 14px;
      color: #777;
 
  }

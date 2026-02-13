@@ -46,10 +46,12 @@
     font-weight: 500;
     min-width: 110px;
     text-align: right;
+    font-size: 18px;
 }
 
 .profile-row-value {
     color: #333;
+    font-size: 18px;
 }
 
 /* כרטיסייה של שיעור */
@@ -57,7 +59,8 @@
     border: 1px solid #ddd;
     border-radius: 8px;
     padding: 10px 12px;
-    margin-bottom: 8px;
+    width: 100%;
+    margin-bottom: 20px;
     background-color: #fff;
 }
 
@@ -70,12 +73,7 @@
     color: #555;
 }
 
-/* כפתור למעבר למערכת השעות */
-.btn-move-to-schedule {
-    margin-top: 10px;
-    width: 100%;
-    max-width: 250px;
-}
+
 
 /*  כפתור "עריכת פרטים" */
 .btn-edit-details {
@@ -93,11 +91,12 @@
 
 /* כפתור ביטול שיעור */
 .btn-cancel-class {
-    width: 15%;
+  
     margin-top: 10px;
     padding: 5px 10px;
     font-size: 0.85rem;
     color: #dc3545;
+    display: block;
     /* אדום */
     background-color: transparent;
     border: 1px solid #dc3545;

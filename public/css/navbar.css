@@ -34,13 +34,15 @@
 #authBtn {
     white-space: nowrap;
     min-width: 120px;
+    font-size: 18px;
 }
 
 /* עיצוב הקישורים בתפריט */
 .navbar-nav .nav-link {
     white-space: nowrap;
     color: var(--logo) !important;
-    font-size: 22px !important;
+    font-size: 25px !important;
+    font-weight: 500;
     margin: 8px;
 }
 
